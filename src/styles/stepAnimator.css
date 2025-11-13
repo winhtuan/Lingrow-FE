@@ -1,0 +1,26 @@
+.fadeSlideIn {
+  opacity: 0;
+  transform: translateX(var(--x-from)) scale(0.99);
+  filter: blur(4px);
+}
+.fadeSlideIn.active {
+  opacity: 1;
+  transform: translateX(0) scale(1);
+  filter: blur(0);
+  transition: opacity 500ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform 500ms cubic-bezier(0.4, 0, 0.2, 1),
+    filter 500ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.fadeSlideOut {
+  opacity: 1;
+  transform: translateX(0) scale(1);
+  filter: blur(0);
+}
+.fadeSlideOut.active {
+  opacity: 0;
+  transform: translateX(var(--x-to)) scale(0.99);
+  filter: blur(4px);
+  transition: opacity 300ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform 300ms cubic-bezier(0.4, 0, 0.2, 1),
+    filter 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
