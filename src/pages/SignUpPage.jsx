@@ -1,3 +1,4 @@
+// src/pages/SignUpPage.jsx
 import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AuthLeft from "../components/auth/AuthLeft";
@@ -15,17 +16,26 @@ import {
   allChecksOk,
 } from "../utils/passwordStrength";
 import { StrengthBar, Requirement } from "../components/ui/PasswordStrength";
+import { useSignUp } from "../hooks/useSignUp";
 
 export default function SignUpPage() {
   const navigate = useNavigate();
-  const [step, setStep] = useState(1);
-  const [direction, setDirection] = useState("next"); // "next" | "back"
 
+  // Step states
+  const [step, setStep] = useState(1);
+  const [direction, setDirection] = useState("next");
+
+  // Form states
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [password, setPassword] = useState("");
-  // Strength & checks
+  const [otpCode, setOtpCode] = useState("");
+
+  // Hook xử lí signup
+  const { loading, handleCreateAccount, handleConfirmOTP } = useSignUp();
+
+  // Password checks (cho UI)
   const score = passwordScore(password);
   const checks = passwordChecks(password);
   const label = strengthLabel(score);
@@ -38,35 +48,60 @@ export default function SignUpPage() {
 
   const goNext = () => {
     setDirection("next");
-    setStep((s) => Math.min(3, s + 1));
+    setStep((s) => Math.min(4, s + 1));
   };
+
   const goBack = () => {
     setDirection("back");
     setStep((s) => Math.max(1, s - 1));
   };
 
+  // Handler click cho nút Create account (gọi hook rồi chuyển step)
+  const onCreateAccountClick = async () => {
+    const ok = await handleCreateAccount({
+      email,
+      fullName,
+      dateOfBirth,
+      password,
+    });
+    if (ok) {
+      goNext();
+    }
+  };
+
+  // Handler click cho nút Confirm OTP
+  const onConfirmOTPClick = () => {
+    return handleConfirmOTP({
+      email,
+      password,
+      otpCode,
+    });
+  };
+
   return (
     <div className="min-h-screen flex bg-white">
-      {/* Panel trái giống SignIn */}
+      {/* Left panel */}
       <AuthLeft
-        brand="Plantpedia"
+        brand="Lingrow"
         heading="Create your account"
-        subheading="Join Plantpedia to discover and manage your favorite plants."
+        subheading="Join Lingrow to discover and manage your favorite plants."
         showRecent={false}
       />
 
-      {/* Form phải */}
+      {/* Right panel */}
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="w-full max-w-md">
+          {/* Mobile Header */}
           <div className="lg:hidden flex items-center gap-3 mb-12">
             <div className="w-10 h-10 bg-slate-900 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-xl">P</span>
             </div>
             <span className="text-slate-900 text-xl font-semibold">
-              Plantpedia
+              Lingrow
             </span>
           </div>
 
+          {/* Header */}
           <h2 className="text-3xl font-bold text-slate-900 mb-2">
             Create an account
           </h2>
@@ -80,18 +115,19 @@ export default function SignUpPage() {
             </button>
           </p>
 
+          {/* Stepper */}
           <div className="mb-8">
-            <Stepper step={step} />
+            <Stepper step={step} total={4} />
           </div>
 
-          {/* StepAnimator: mọi nội dung step nằm bên trong */}
           <StepAnimator step={step} direction={direction}>
             {(current) => (
               <>
+                {/* Step 1: Email */}
                 {current === 1 && (
                   <>
                     <Field
-                      id="email"
+                      id="signup-email"
                       label="What’s your email?"
                       type="email"
                       value={email}
@@ -112,23 +148,30 @@ export default function SignUpPage() {
                   </>
                 )}
 
+                {/* Step 2: Basic info */}
                 {current === 2 && (
                   <>
-                    <Field
-                      id="fullname"
-                      label="Your name"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      placeholder="Enter your full name"
-                    />
+                    <div className="col-span-4">
+                      <Field
+                        id="signup-fullname"
+                        label="Your name"
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        placeholder="Enter your full name"
+                      />
+                    </div>
+
+                    {/* Date of birth ở dưới, full width */}
                     <DateOfBirthField
-                      className="mt-4"
+                      id="signup-dob"
                       value={dateOfBirth}
                       onChange={setDateOfBirth}
                       minAge={13}
                       maxAge={100}
                     />
-                    <div className="flex gap-3 mt-6">
+
+                    {/* Actions */}
+                    <div className="flex items-center gap-3 mt-6">
                       <Button
                         variant="outline"
                         size="md"
@@ -137,6 +180,7 @@ export default function SignUpPage() {
                       >
                         Back
                       </Button>
+
                       <Button
                         size="md"
                         className="rounded-full px-6"
@@ -149,16 +193,16 @@ export default function SignUpPage() {
                   </>
                 )}
 
+                {/* Step 3: Password */}
                 {current === 3 && (
                   <>
                     <PasswordField
-                      id="password"
+                      id="signup-password"
                       label="Create a password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       showForgot={false}
                     />
-                    {/* Strength meter (luôn chiếm chỗ để tránh layout shift) */}
                     <div className="flex items-center justify-between mt-1.5">
                       <span
                         className={`text-xs font-medium ${
@@ -169,8 +213,6 @@ export default function SignUpPage() {
                       </span>
                     </div>
                     <StrengthBar score={score} />
-
-                    {/* Requirements checklist */}
                     <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 mt-3">
                       <Requirement ok={checks.len}>8+ characters</Requirement>
                       <Requirement ok={checks.digit}>
@@ -186,6 +228,7 @@ export default function SignUpPage() {
                         Lowercase letter
                       </Requirement>
                     </div>
+
                     <div className="flex gap-3 mt-6">
                       <Button
                         variant="outline"
@@ -198,17 +241,48 @@ export default function SignUpPage() {
                       <Button
                         size="md"
                         className="rounded-full px-6"
-                        onClick={() =>
-                          console.log("submit", {
-                            email,
-                            fullName,
-                            dateOfBirth,
-                            password,
-                          })
-                        }
+                        onClick={onCreateAccountClick}
                         disabled={!passValid}
+                        loading={loading}
                       >
                         Create account
+                      </Button>
+                    </div>
+                  </>
+                )}
+
+                {/* Step 4: OTP Confirmation */}
+                {current === 4 && (
+                  <>
+                    <Field
+                      id="signup-otp"
+                      label="Enter the verification code"
+                      value={otpCode}
+                      onChange={(e) => setOtpCode(e.target.value)}
+                      placeholder="Enter code sent to your email"
+                    />
+                    <p className="text-sm text-slate-500 mt-2">
+                      A 6-digit code has been sent to{" "}
+                      <b>{email || "your email"}</b>. Please check your inbox.
+                    </p>
+
+                    <div className="flex gap-3 mt-6">
+                      <Button
+                        variant="outline"
+                        size="md"
+                        className="rounded-full px-6"
+                        onClick={goBack}
+                      >
+                        Back
+                      </Button>
+                      <Button
+                        size="md"
+                        className="rounded-full px-6"
+                        onClick={onConfirmOTPClick}
+                        disabled={!otpCode.trim()}
+                        loading={loading}
+                      >
+                        Confirm
                       </Button>
                     </div>
                   </>
@@ -229,7 +303,7 @@ export default function SignUpPage() {
             </div>
           </div>
 
-          {/* Social */}
+          {/* Social Buttons */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <SocialButton
               provider="google"
@@ -248,12 +322,12 @@ export default function SignUpPage() {
               Facebook
             </SocialButton>
             <SocialButton
-              provider="github"
+              provider="aws"
               fullWidth
               size="md"
               className="rounded-full h-12"
             >
-              Github
+              Amazon
             </SocialButton>
           </div>
         </div>

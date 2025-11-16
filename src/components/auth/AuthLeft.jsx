@@ -1,9 +1,10 @@
 // components/auth/AuthLeft.jsx
 import React from "react";
 import RecentAccounts from "./RecentAccounts";
+import fav from "../../assets/images/fav.jpg";
 
 export default function AuthLeft({
-  brand = "Plantpedia",
+  brand = "Lingrow",
   accounts = [],
   onRemove,
   onAddNew,
@@ -17,11 +18,7 @@ export default function AuthLeft({
       <div className="animate-fade-in">
         <div className="flex items-center gap-3 mb-16">
           <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-            <img
-              src="https://placehold.co/400"
-              alt="Logo"
-              className="w-7 h-7 object-contain"
-            />
+            <img src={fav} alt="Logo" className="w-7 h-7 object-contain" />
           </div>
           <span className="text-white text-xl font-semibold">{brand}</span>
         </div>
