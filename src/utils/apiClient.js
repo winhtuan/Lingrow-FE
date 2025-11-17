@@ -17,11 +17,6 @@ export async function api(path, options = {}) {
   const token =
     localStorage.getItem("idToken") || localStorage.getItem("access_token");
 
-  console.log(
-    "apiClient - Token from localStorage:",
-    token ? token.substring(0, 50) + "..." : "NO TOKEN"
-  );
-
   if (token) {
     finalHeaders["Authorization"] = `Bearer ${token}`;
   }
@@ -52,7 +47,6 @@ export async function api(path, options = {}) {
       // Token hết hạn hoặc sai
       localStorage.clear();
       window.location.href = "/signin";
-      console.warn("API 401 Unauthorized at", url);
     }
     const msg = data?.error || data?.message || `HTTP ${res.status}`;
     const err = new Error(msg);

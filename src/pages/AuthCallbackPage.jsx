@@ -22,10 +22,6 @@ export default function AuthCallbackPage() {
     const idToken = params.get("id_token");
     const refreshToken = params.get("refresh_token");
 
-    console.log("Auth callback hash:", hash);
-    console.log("access_token:", accessToken);
-    console.log("id_token:", idToken);
-
     if (!accessToken && !idToken) {
       toast.error("Social login failed. Please try again.");
       navigate("/signin", { replace: true });
@@ -54,8 +50,6 @@ export default function AuthCallbackPage() {
             Authorization: `Bearer ${bearer}`,
           },
         });
-
-        console.log("/auth/me status:", res.status);
 
         if (!res.ok) {
           const text = await res.text();
