@@ -4,8 +4,10 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "../components/ui/Toast";
 import { cognitoLogin } from "../utils/cognitoAuth";
 import { getSocialLoginUrl } from "../utils/cognitoHostedUi";
+import { useAuth } from "../contexts/AuthContext";
 
 export function useLogin() {
+  const { setUser } = useAuth(); // dùng thật
   const [loading, setLoading] = useState(false);
   const [selectedAcc, setSelectedAcc] = useState(null);
 
@@ -23,17 +25,37 @@ export function useLogin() {
       try {
         setLoading(true);
 
-        // cognitoLogin trả về object { idToken, accessToken, refreshToken }
         const { idToken, accessToken, refreshToken } = await cognitoLogin(
           email,
           password
         );
 
-        // Lưu token vào localStorage - dùng chung convention với apiClient
+        // Lưu token
         localStorage.setItem("idToken", idToken);
         localStorage.setItem("access_token", accessToken);
         if (refreshToken) {
           localStorage.setItem("refresh_token", refreshToken);
+        }
+
+        // Lấy thông tin user thật từ BE rồi đẩy vào context
+        // Dùng idToken vì có đầy đủ thông tin (email, name, sub)
+        const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://localhost:5189/api";
+        
+        try {
+          const res = await fetch(`${API_BASE}/auth/me`, {
+            headers: {
+              Authorization: `Bearer ${idToken}`,
+            },
+          });
+
+          if (res.ok) {
+            const data = await res.json();
+            setUser(data);
+          } else {
+            console.warn("Fetch /auth/me after login failed");
+          }
+        } catch (err) {
+          console.error("Fetch /auth/me error:", err);
         }
 
         toast.success("Signed in successfully.");
@@ -45,7 +67,7 @@ export function useLogin() {
         setLoading(false);
       }
     },
-    [navigate, toast]
+    [navigate, toast, setUser]
   );
 
   // Đăng nhập nhanh bằng account gần đây

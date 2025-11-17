@@ -1,3 +1,4 @@
+// src/components/TopBar.jsx
 import React, { useRef, useState } from "react";
 import {
   LuMenu,
@@ -7,17 +8,17 @@ import {
   LuChevronLeft,
   LuChevronRight,
 } from "react-icons/lu";
+import { useNavigate } from "react-router-dom";
+import Button from "../ui/Button";
+import { useAuth } from "../../contexts/AuthContext";
 import UserMenu from "./UserMenu";
 import NotificationMenu from "./NotificationMenu";
 
 export default function TopBar({
-  // mobile drawer
   sidebarOpen,
   onToggleSidebar,
-  // desktop collapsed
   sidebarCollapsed,
   onToggleCollapse,
-
   query,
   onQuery,
   onOpenCreate,
@@ -26,7 +27,6 @@ export default function TopBar({
   onOpenSettings,
   onOpenShortcuts,
   onLogout,
-  user,
   theme = "system",
   onChangeTheme,
 }) {
@@ -34,6 +34,9 @@ export default function TopBar({
   const avatarRef = useRef(null);
   const [notifOpen, setNotifOpen] = useState(false);
   const bellRef = useRef(null);
+
+  const navigate = useNavigate();
+  const { user } = useAuth(); // lấy user từ context
 
   const notifications = [
     {
@@ -51,6 +54,9 @@ export default function TopBar({
       time: "1 giờ trước",
     },
   ];
+
+  const displayName = user?.fullName || user?.name || user?.email || "User";
+  const avatarLetter = displayName.charAt(0).toUpperCase();
 
   return (
     <header className="fixed top-0 inset-x-0 h-16 bg-white/80 backdrop-blur border-b border-gray-200 z-50">
@@ -124,32 +130,46 @@ export default function TopBar({
             />
           </div>
 
-          {/* Avatar */}
-          <div className="relative">
-            <button
-              ref={avatarRef}
-              onClick={() => setMenuOpen((v) => !v)}
-              className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 grid place-items-center text-white text-sm font-medium cursor-pointer shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:ring-offset-1"
-              aria-haspopup="menu"
-              aria-expanded={menuOpen}
-              aria-label="Mở menu người dùng"
+          {/* Nếu chưa login -> hiện nút Sign in */}
+          {!user && (
+            <Button
+              onClick={() => navigate("/signin")}
+              variant="outline"
+              size="sm"
+              className="rounded-full px-6"
             >
-              U
-            </button>
+              Sign in
+            </Button>
+          )}
 
-            <UserMenu
-              open={menuOpen}
-              onClose={() => setMenuOpen(false)}
-              anchorRef={avatarRef}
-              user={user}
-              theme={theme}
-              onChangeTheme={onChangeTheme}
-              onOpenProfile={onOpenProfile}
-              onOpenSettings={onOpenSettings}
-              onOpenShortcuts={onOpenShortcuts}
-              onLogout={onLogout}
-            />
-          </div>
+          {/* Nếu đã login -> hiện avatar + UserMenu */}
+          {user && (
+            <div className="relative ml-1">
+              <button
+                ref={avatarRef}
+                onClick={() => setMenuOpen((v) => !v)}
+                className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 grid place-items-center text-white text-sm font-medium cursor-pointer shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:ring-offset-1"
+                aria-haspopup="menu"
+                aria-expanded={menuOpen}
+                aria-label="Mở menu người dùng"
+              >
+                {avatarLetter}
+              </button>
+
+              <UserMenu
+                open={menuOpen}
+                onClose={() => setMenuOpen(false)}
+                anchorRef={avatarRef}
+                user={user}
+                theme={theme}
+                onChangeTheme={onChangeTheme}
+                onOpenProfile={onOpenProfile}
+                onOpenSettings={onOpenSettings}
+                onOpenShortcuts={onOpenShortcuts}
+                onLogout={onLogout}
+              />
+            </div>
+          )}
         </div>
       </div>
     </header>

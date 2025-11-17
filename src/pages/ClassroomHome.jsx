@@ -30,38 +30,6 @@ const demoSeed = [
     initials: "HA",
     bgImage: "https://gstatic.com/classroom/themes/img_graduation.jpg",
   },
-  {
-    id: "3",
-    title: "Grammar for Devs",
-    teacher: "Tuấn",
-    code: "GRM_DEV",
-    initials: "TT",
-    bgImage: "https://gstatic.com/classroom/themes/img_breakfast.jpg",
-  },
-  {
-    id: "4",
-    title: "TOEIC Intensive 600+",
-    teacher: "Thanh Huyen",
-    code: "TOEIC_600",
-    initials: "TH",
-    bgImage: "https://gstatic.com/classroom/themes/img_bookclub.jpg",
-  },
-  {
-    id: "5",
-    title: "Business English Pro",
-    teacher: "Minh Nguyet",
-    code: "BUS_ENG",
-    initials: "MN",
-    bgImage: "https://gstatic.com/classroom/themes/img_code.jpg",
-  },
-  {
-    id: "6",
-    title: "Conversation Practice",
-    teacher: "Hà Anh",
-    code: "CONV_01",
-    initials: "HA",
-    bgImage: "https://gstatic.com/classroom/themes/img_cycling.jpg",
-  },
 ];
 
 const bgPatterns = [

@@ -1,3 +1,4 @@
+// src/components/UserMenu.jsx
 import React, { useEffect, useRef } from "react";
 import {
   LuUser,
@@ -9,22 +10,11 @@ import {
   LuLogOut,
 } from "react-icons/lu";
 
-/**
- * UserMenu — dropdown cài đặt người dùng
- * Props:
- * - open: boolean
- * - onClose: () => void
- * - anchorRef: ref tới button avatar (để click outside)
- * - user: { name?: string, email?: string }
- * - theme: "light" | "dark" | "system"
- * - onChangeTheme: (t) => void
- * - onOpenProfile, onOpenSettings, onOpenShortcuts, onLogout: () => void
- */
 export default function UserMenu({
   open,
   onClose,
   anchorRef,
-  user = { name: "User Name", email: "user@example.com" },
+  user,
   theme = "system",
   onChangeTheme,
   onOpenProfile,
@@ -34,7 +24,6 @@ export default function UserMenu({
 }) {
   const menuRef = useRef(null);
 
-  // đóng khi click outside / Esc
   useEffect(() => {
     if (!open) return;
     const onClick = (e) => {
@@ -59,6 +48,9 @@ export default function UserMenu({
   }, [open, onClose, anchorRef]);
 
   if (!open) return null;
+
+  const displayName = user?.fullName || user?.name || user?.email || "User";
+  const displayEmail = user?.email || "";
 
   const Item = ({ icon: Icon, label, onClick, hotkey, active = false }) => (
     <button
@@ -103,8 +95,10 @@ export default function UserMenu({
     >
       {/* Header */}
       <div className="px-3 py-2">
-        <p className="text-sm font-semibold text-gray-900">{user.name}</p>
-        <p className="text-xs text-gray-500 truncate">{user.email}</p>
+        <p className="text-sm font-semibold text-gray-900">{displayName}</p>
+        {displayEmail && (
+          <p className="text-xs text-gray-500 truncate">{displayEmail}</p>
+        )}
       </div>
       <div className="my-2 h-px bg-gray-100" />
 
@@ -136,7 +130,6 @@ export default function UserMenu({
 
       <div className="my-2 h-px bg-gray-100" />
 
-      {/* Theme group */}
       <div className="px-3 pb-1 pt-1 text-[11px] uppercase tracking-wide text-gray-400">
         Giao diện
       </div>
