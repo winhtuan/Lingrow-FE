@@ -7,12 +7,14 @@ import SignUpPage from "../pages/SignUpPage";
 import AuthCallbackPage from "../pages/AuthCallbackPage";
 import VerifyEmailPage from "../pages/VerifyEmailPage";
 import ErrorPage from "../pages/ErrorPage";
+import SchedulePage from "../pages/SchedulePage";
 
 const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/signin" element={<LoginPage />} />
       <Route path="/signup" element={<SignUpPage />} />
+      <Route path="/schedule" element={<SchedulePage />} />
       <Route path="/auth/callback" element={<AuthCallbackPage />} />
       <Route path="/verify-email" element={<VerifyEmailPage />} />
       <Route path="/error" element={<ErrorPage />} />

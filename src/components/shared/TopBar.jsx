@@ -2,7 +2,6 @@
 import React, { useRef, useState } from "react";
 import {
   LuMenu,
-  LuBook,
   LuPlus,
   LuBell,
   LuChevronLeft,
@@ -13,6 +12,7 @@ import Button from "../ui/Button";
 import { useAuth } from "../../contexts/AuthContext";
 import UserMenu from "./UserMenu";
 import NotificationMenu from "./NotificationMenu";
+import fav from "../../assets/images/fav.jpg";
 
 export default function TopBar({
   sidebarOpen,
@@ -90,11 +90,11 @@ export default function TopBar({
 
           {/* Logo */}
           <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-emerald-600 grid place-items-center shadow-sm">
-              <LuBook className="w-5 h-5 text-white" />
+            <div className="w-9 h-9 rounded-xl grid place-items-center shadow-sm">
+              <img src={fav} alt="Lingrow Logo" className="w-5 h-5" />
             </div>
             <span className="text-lg text-gray-800 font-semibold hidden sm:block">
-              English Class
+              Lingrow
             </span>
           </div>
         </div>

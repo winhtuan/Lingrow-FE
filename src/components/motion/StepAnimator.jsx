@@ -1,5 +1,4 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
-import "../../styles/stepAnimator.css";
 /**
  * StepAnimator
  * - Chuyển cảnh mượt (slide + fade + nhẹ blur + scale) khi đổi step

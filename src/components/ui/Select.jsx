@@ -66,7 +66,7 @@ export default function Select({
       top: `${top}px`,
       left: `${left}px`,
       width: `${width}px`,
-      zIndex: 1000,
+      zIndex: 11000,
       // để browser tối ưu compositing
       willChange: "transform, top, left",
     });
