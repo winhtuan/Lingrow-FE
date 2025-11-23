@@ -22,6 +22,7 @@ export default function CalendarGrid({
   onPrevWeek,
   onNextWeek,
   onToday,
+  onPinLesson,
 }) {
   const today = dayjs();
 
@@ -32,13 +33,24 @@ export default function CalendarGrid({
 
   const lessonsBySlot = useMemo(() => {
     const map = {};
+    const weekEnd = weekStart.add(7, "day");
+
     for (const lesson of lessons) {
-      const key = `${lesson.dayIndex}-${lesson.hour}`;
+      if (!lesson.date) continue;
+
+      const d = dayjs(lesson.date).startOf("day");
+      if (d.isBefore(weekStart, "day") || !d.isBefore(weekEnd, "day")) continue;
+
+      const dayIndex = d.diff(weekStart.startOf("day"), "day");
+      if (dayIndex < 0 || dayIndex > 6) continue;
+
+      const key = `${dayIndex}-${lesson.hour}`;
       if (!map[key]) map[key] = [];
       map[key].push(lesson);
     }
+
     return map;
-  }, [lessons]);
+  }, [lessons, weekStart]);
 
   return (
     <section className="mt-2.5 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
@@ -172,6 +184,7 @@ export default function CalendarGrid({
                       hour={hour}
                       lessons={slotLessons}
                       isAltRow={isAltRow}
+                      onPinLesson={onPinLesson} // THÊM
                     />
                   );
                 })}

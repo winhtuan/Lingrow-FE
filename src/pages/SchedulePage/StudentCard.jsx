@@ -1,53 +1,47 @@
 // src/pages/SchedulePage/StudentCard.jsx
-import React, { useMemo } from "react";
-import { Book, GripVertical } from "lucide-react";
+import React, { useMemo, useState, useRef, useEffect } from "react";
+import { GripVertical } from "lucide-react";
 
 const COLOR_MAP = {
   blue: {
     bg: "bg-blue-50",
     border: "border-blue-200",
-    accent: "bg-blue-500",
     ring: "ring-blue-200",
     avatarBg: "bg-blue-100",
     avatarBorder: "border-blue-400",
     avatarRing: "ring-blue-300",
+    tagBg: "bg-blue-100/80",
+    tagBorder: "border-blue-200",
+    tagText: "text-blue-900",
   },
   purple: {
     bg: "bg-purple-50",
     border: "border-purple-200",
-    accent: "bg-purple-500",
     ring: "ring-purple-200",
     avatarBg: "bg-purple-100",
     avatarBorder: "border-purple-400",
     avatarRing: "ring-purple-300",
+    tagBg: "bg-purple-100/80",
+    tagBorder: "border-purple-200",
+    tagText: "text-purple-900",
   },
   green: {
     bg: "bg-green-50",
     border: "border-green-200",
-    accent: "bg-green-500",
     ring: "ring-green-200",
     avatarBg: "bg-green-100",
     avatarBorder: "border-green-400",
     avatarRing: "ring-green-300",
+    tagBg: "bg-green-100/80",
+    tagBorder: "border-green-200",
+    tagText: "text-green-900",
   },
-  amber: {
-    bg: "bg-amber-50",
-    border: "border-amber-200",
-    accent: "bg-amber-500",
-    ring: "ring-amber-200",
-    avatarBg: "bg-amber-100",
-    avatarBorder: "border-amber-400",
-    avatarRing: "ring-amber-300",
-  },
-  rose: {
-    bg: "bg-rose-50",
-    border: "border-rose-200",
-    accent: "bg-rose-500",
-    ring: "ring-rose-200",
-    avatarBg: "bg-rose-100",
-    avatarBorder: "border-rose-400",
-    avatarRing: "ring-rose-300",
-  },
+};
+
+const TAG_LABELS = {
+  eng: "Tiếng Anh",
+  code: "Tin học",
+  math: "Toán học",
 };
 
 export default function StudentCard({
@@ -55,11 +49,16 @@ export default function StudentCard({
   isDragging = false,
   showHandle = true,
   className = "",
+  onEdit,
+  onDelete,
 }) {
-  // CHỈ lấy theo student.color, nếu không có thì fallback "blue"
   const colorKey =
     student?.color && COLOR_MAP[student.color] ? student.color : "blue";
   const color = COLOR_MAP[colorKey];
+
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef(null);
+  const handleRef = useRef(null);
 
   const initials = useMemo(() => {
     if (!student?.name) return "";
@@ -70,13 +69,42 @@ export default function StudentCard({
       .join("");
   }, [student?.name]);
 
-  const courseText = student.course || student.note;
+  const tagLabel =
+    student?.tag && TAG_LABELS[student.tag]
+      ? TAG_LABELS[student.tag]
+      : student?.tag || "";
+
+  // đóng menu khi click ra ngoài
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (!menuOpen) return;
+
+      const menuEl = menuRef.current;
+      const handleEl = handleRef.current;
+
+      // nếu click không nằm trong menu và cũng không nằm trong nút handle => đóng
+      if (
+        menuEl &&
+        !menuEl.contains(e.target) &&
+        handleEl &&
+        !handleEl.contains(e.target)
+      ) {
+        setMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [menuOpen]);
 
   const wrapper = [
-    "group relative flex items-stretch rounded-xl",
-    color.bg, // pastel gia sư chọn
+    "group relative flex items-stretch rounded-xl z-0 hover:z-20",
+    "overflow-visible",
+    color.bg,
     "border",
-    color.border, // viền đậm hơn pastel 100
+    color.border,
     "shadow-sm",
     "transition-all duration-150",
     isDragging
@@ -96,22 +124,39 @@ export default function StudentCard({
     "shadow-sm flex-shrink-0",
   ].join(" ");
 
+  const tagClasses = [
+    "inline-flex items-center px-2 py-0.5 rounded-full border text-[11px] font-medium",
+    color.tagBg,
+    color.tagBorder,
+    color.tagText,
+  ].join(" ");
+
+  const handleMenuToggle = (e) => {
+    e.stopPropagation();
+    setMenuOpen((prev) => !prev);
+  };
+
+  const handleEditClick = (e) => {
+    e.stopPropagation();
+    setMenuOpen(false);
+    onEdit?.(student);
+  };
+
+  const handleDeleteClick = (e) => {
+    e.stopPropagation();
+    setMenuOpen(false);
+    onDelete?.(student);
+  };
+
   return (
     <div className={wrapper}>
-      {/* thanh bar accent nhỏ bên trái */}
-      <div
-        className={`absolute left-2 top-2 bottom-2 w-1 rounded-full ${color.accent}`}
-      />
-
       <div className="flex items-center gap-3 px-4 py-3 w-full relative z-10">
-        {/* Avatar đậm hơn màu nền */}
         <div className={avatarClasses}>
           <span className="text-[10px] font-semibold tracking-wide text-slate-700">
             {initials}
           </span>
         </div>
 
-        {/* Nội dung */}
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
             <h3 className="text-sm font-semibold text-slate-900 truncate">
@@ -119,14 +164,44 @@ export default function StudentCard({
             </h3>
 
             {showHandle && (
-              <GripVertical className="w-4 h-4 text-slate-300 flex-shrink-0 group-hover:text-slate-400 transition" />
+              <div className="relative">
+                <button
+                  type="button"
+                  ref={handleRef}
+                  onClick={handleMenuToggle}
+                  className="p-1 rounded-md text-slate-300 hover:text-slate-500 hover:bg-white/70 transition"
+                >
+                  <GripVertical className="w-4 h-4" />
+                </button>
+
+                {menuOpen && (
+                  <div
+                    ref={menuRef}
+                    className="absolute right-0 mt-1 w-32 rounded-xl bg-white border border-slate-100 shadow-lg py-1 text-xs z-20"
+                  >
+                    <button
+                      type="button"
+                      onClick={handleEditClick}
+                      className="w-full text-left px-3 py-1.5 hover:bg-slate-50 text-slate-700"
+                    >
+                      Sửa thẻ
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleDeleteClick}
+                      className="w-full text-left px-3 py-1.5 hover:bg-rose-50 text-rose-600"
+                    >
+                      Xoá thẻ
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
           </div>
 
-          {courseText && (
-            <div className="mt-1 flex items-center gap-1.5 text-xs text-slate-600">
-              <Book className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
-              <span className="truncate">{courseText}</span>
+          {tagLabel && (
+            <div className="mt-1">
+              <span className={tagClasses}>{tagLabel}</span>
             </div>
           )}
         </div>

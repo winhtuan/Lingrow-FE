@@ -1,7 +1,15 @@
+// src/pages/SchedulePage/ScheduleCell.jsx
 import React from "react";
 import { useDroppable } from "@dnd-kit/core";
+import { Pin } from "lucide-react";
 
-export default function ScheduleCell({ dayIndex, hour, lessons, isAltRow }) {
+export default function ScheduleCell({
+  dayIndex,
+  hour,
+  lessons,
+  isAltRow,
+  onPinLesson,
+}) {
   const { setNodeRef, isOver } = useDroppable({
     id: `slot-${dayIndex}-${hour}`,
   });
@@ -21,12 +29,17 @@ export default function ScheduleCell({ dayIndex, hour, lessons, isAltRow }) {
           lesson.colorClass ||
           "bg-slate-900 text-white border border-slate-900";
 
+        const pinned = lesson.pinned;
+
         return (
           <div
             key={lesson.id}
             className={[
-              "rounded-md text-xs px-2 py-3 shadow-sm border transition-all duration-150",
+              "relative rounded-md text-xs px-2 py-3 pr-7 shadow-sm border",
+              "transition-all duration-150",
+              "min-h-[56px] flex flex-col justify-center",
               colorClass,
+              pinned ? "ring-1 ring-slate-900/20" : "",
             ].join(" ")}
           >
             <div className="font-semibold truncate">{lesson.studentName}</div>
@@ -35,6 +48,24 @@ export default function ScheduleCell({ dayIndex, hour, lessons, isAltRow }) {
                 {lesson.note}
               </div>
             )}
+
+            {/* Nút ghim 3 tháng */}
+            <button
+              type="button"
+              onClick={() => onPinLesson?.(lesson.id)}
+              className={[
+                "absolute top-1.5 right-1.5 inline-flex items-center justify-center",
+                "w-5 h-5 rounded-full bg-white/90 text-slate-500",
+                "hover:bg-white hover:text-slate-700 shadow-sm",
+              ].join(" ")}
+            >
+              <Pin
+                className={[
+                  "w-3 h-3",
+                  pinned ? "fill-rose-600 text-rose-400" : "",
+                ].join(" ")}
+              />
+            </button>
           </div>
         );
       })}

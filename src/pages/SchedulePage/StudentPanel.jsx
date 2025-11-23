@@ -1,20 +1,43 @@
 // src/pages/SchedulePage/StudentPanel.jsx
+import React from "react";
 import { Plus, Search, User } from "lucide-react";
 import DraggableStudentCard from "./DraggableStudentCard";
+
+const TAG_OPTIONS = [
+  { value: "all", label: "Tất cả tag" },
+  { value: "eng", label: "Tiếng Anh" },
+  { value: "code", label: "Tin học" },
+  { value: "math", label: "Toán học" },
+];
 
 export default function StudentPanel({
   students,
   totalCount,
   query,
   onQueryChange,
+  tagFilter,
+  onTagFilterChange,
   onOpenCreate,
+  onEditStudent,
+  onDeleteStudent,
 }) {
+  const q = (query || "").toLowerCase().trim();
+
   const filtered =
     students?.filter((s) => {
-      const q = query.toLowerCase();
-      const name = s.name.toLowerCase();
+      const name = (s.name || "").toLowerCase();
       const note = (s.note || "").toLowerCase();
-      return name.includes(q) || note.includes(q);
+      const tag = (s.tag || "").toLowerCase();
+
+      const matchesSearch =
+        q === "" || name.includes(q) || note.includes(q) || tag.includes(q);
+
+      const matchesTag =
+        !tagFilter ||
+        tagFilter === "all" ||
+        (s.tag && s.tag.toLowerCase() === tagFilter.toLowerCase());
+
+      return matchesSearch && matchesTag;
     }) ?? [];
 
   const total = totalCount ?? students?.length ?? 0;
@@ -22,12 +45,13 @@ export default function StudentPanel({
   return (
     <section
       className="
-        bg-white 
-        rounded-3xl
-        border border-slate-200
-        shadow-[0_4px_20px_rgba(0,0,0,0.05)]
-        flex flex-col overflow-hidden
-      "
+      bg-white 
+      rounded-3xl
+      border border-slate-200
+      shadow-[0_4px_20px_rgba(0,0,0,0.05)]
+      flex flex-col
+      overflow-visible
+    "
     >
       {/* Header */}
       <div className="px-5 pt-4 pb-3 border-b border-slate-200 bg-white">
@@ -58,30 +82,64 @@ export default function StudentPanel({
           </div>
         </div>
 
-        {/* Search bar kiểu Notion */}
-        <div className="relative mb-2">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <input
-            value={query}
-            onChange={(e) => onQueryChange(e.target.value)}
-            placeholder="Tìm kiếm học sinh..."
-            className="
-              w-full rounded-xl
-              border border-slate-200
-              bg-white
-              pl-10 pr-4 py-2.5
-              text-sm text-slate-900
-              placeholder:text-slate-400
-              outline-none
-              focus:ring-2 focus:ring-slate-200 focus:border-slate-300
-              transition
-            "
-          />
+        {/* Search + Tag filter: 4/5 vs 1/5 */}
+        <div className="grid grid-cols-5 gap-2 mb-2">
+          <div className="col-span-4 relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <input
+              value={query}
+              onChange={(e) => onQueryChange(e.target.value)}
+              placeholder="Tìm kiếm học sinh..."
+              className="
+                w-full rounded-xl
+                border border-slate-200
+                bg-white
+                pl-10 pr-4 py-2.5
+                text-sm text-slate-900
+                placeholder:text-slate-400
+                outline-none
+                focus:ring-2 focus:ring-slate-200 focus:border-slate-300
+                transition
+              "
+            />
+          </div>
+
+          <div className="col-span-1">
+            <select
+              value={tagFilter}
+              onChange={(e) => onTagFilterChange(e.target.value)}
+              className="
+                w-full rounded-xl
+                border border-slate-200
+                bg-white
+                px-3 py-2.5
+                text-xs sm:text-sm text-slate-700
+                outline-none
+                focus:ring-2 focus:ring-slate-200 focus:border-slate-300
+                cursor-pointer
+              "
+            >
+              {TAG_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
-      {/* Body */}
-      <div className="flex-1 overflow-auto px-4 py-4 bg-white">
+      {/* Body: khoảng cao tương đương 7 thẻ, ẩn scrollbar nhưng vẫn scroll */}
+      <div
+        className="
+          flex-1 px-4 py-4 bg-white 
+          overflow-auto 
+          max-h-[545px]
+          [scrollbar-width:none]
+          [-ms-overflow-style:none]
+          [&::-webkit-scrollbar]:hidden
+        "
+      >
         {filtered.length === 0 ? (
           <div className="mt-10 text-center text-sm text-slate-500">
             Không tìm thấy học sinh
@@ -89,7 +147,12 @@ export default function StudentPanel({
         ) : (
           <div className="space-y-4">
             {filtered.map((student) => (
-              <DraggableStudentCard key={student.id} student={student} />
+              <DraggableStudentCard
+                key={student.id}
+                student={student}
+                onEdit={onEditStudent}
+                onDelete={onDeleteStudent}
+              />
             ))}
           </div>
         )}
