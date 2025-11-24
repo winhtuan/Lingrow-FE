@@ -13,6 +13,9 @@ COPY tailwind.config.js ./
 COPY public ./public
 COPY src ./src
 
+# Copy .env.production file (React sẽ tự động dùng khi NODE_ENV=production)
+COPY .env.production ./
+
 # Build (tailwind + CRA)
 RUN npm run build
 
