@@ -27,6 +27,17 @@ export default function Button({
     primary: "bg-slate-900 text-white hover:bg-slate-800",
     outline:
       "border border-slate-200 text-slate-700 hover:bg-slate-50 bg-white",
+
+    blue: "bg-sky-600 text-white hover:bg-sky-700 active:bg-sky-800",
+    red: "bg-rose-500 text-white hover:bg-rose-600 active:bg-rose-700",
+    green:
+      "bg-emerald-500 text-white hover:bg-emerald-600 active:bg-emerald-700",
+
+    blueSoft: "bg-sky-50 text-sky-700 border border-sky-200 hover:bg-sky-100",
+    redSoft:
+      "bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100",
+    greenSoft:
+      "bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100",
   };
 
   return (

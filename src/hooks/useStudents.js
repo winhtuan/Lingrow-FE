@@ -10,7 +10,7 @@ export function useStudents(initial = []) {
   const filteredStudents = useMemo(
     () =>
       students.filter((s) =>
-        `${s.name} ${s.note ?? ""}`
+        `${s.name ?? ""} ${s.note ?? ""}`
           .toLowerCase()
           .includes(studentQuery.toLowerCase())
       ),
@@ -18,10 +18,12 @@ export function useStudents(initial = []) {
   );
 
   const addStudent = ({ name, note, tag, color }) => {
+    const id = `s-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
     setStudents((prev) => [
       ...prev,
       {
-        id: `s-${Date.now()}`,
+        id,
         name,
         note,
         tag: tag || null,

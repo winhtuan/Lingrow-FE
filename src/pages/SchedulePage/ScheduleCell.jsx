@@ -1,7 +1,26 @@
 // src/pages/SchedulePage/ScheduleCell.jsx
 import React from "react";
-import { useDroppable } from "@dnd-kit/core";
+import { useDroppable, useDraggable } from "@dnd-kit/core";
 import { Pin } from "lucide-react";
+
+function LessonDraggable({ lesson, children }) {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id: lesson.id,
+  });
+
+  const style = {
+    // rất quan trọng: ẩn card gốc khi đang kéo,
+    // để chỉ còn overlay nhìn, không bị cắt giữa 2 hàng
+    opacity: isDragging ? 0 : 1,
+    cursor: "grab",
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      {children}
+    </div>
+  );
+}
 
 export default function ScheduleCell({
   dayIndex,
@@ -32,41 +51,41 @@ export default function ScheduleCell({
         const pinned = lesson.pinned;
 
         return (
-          <div
-            key={lesson.id}
-            className={[
-              "relative rounded-md text-xs px-2 py-3 pr-7 shadow-sm border",
-              "transition-all duration-150",
-              "min-h-[56px] flex flex-col justify-center",
-              colorClass,
-              pinned ? "ring-1 ring-slate-900/20" : "",
-            ].join(" ")}
-          >
-            <div className="font-semibold truncate">{lesson.studentName}</div>
-            {lesson.note && (
-              <div className="text-[11px] opacity-80 truncate">
-                {lesson.note}
-              </div>
-            )}
-
-            {/* Nút ghim 3 tháng */}
-            <button
-              type="button"
-              onClick={() => onPinLesson?.(lesson.id)}
+          <LessonDraggable key={lesson.id} lesson={lesson}>
+            <div
               className={[
-                "absolute top-1.5 right-1.5 inline-flex items-center justify-center",
-                "w-5 h-5 rounded-full bg-white/90 text-slate-500",
-                "hover:bg-white hover:text-slate-700 shadow-sm",
+                "relative rounded-md text-xs px-2 py-3 pr-7 shadow-sm border",
+                "transition-all duration-150",
+                "min-h-[56px] flex flex-col justify-center",
+                colorClass,
+                pinned ? "ring-1 ring-slate-900/20" : "",
               ].join(" ")}
             >
-              <Pin
+              <div className="font-semibold truncate">{lesson.studentName}</div>
+              {lesson.note && (
+                <div className="text-[11px] opacity-80 truncate">
+                  {lesson.note}
+                </div>
+              )}
+
+              <button
+                type="button"
+                onClick={() => onPinLesson?.(lesson.id)}
                 className={[
-                  "w-3 h-3",
-                  pinned ? "fill-rose-600 text-rose-400" : "",
+                  "absolute top-1.5 right-1.5 inline-flex items-center justify-center",
+                  "w-5 h-5 rounded-full bg-white/90 text-slate-500",
+                  "hover:bg-white hover:text-slate-700 shadow-sm",
                 ].join(" ")}
-              />
-            </button>
-          </div>
+              >
+                <Pin
+                  className={[
+                    "w-3 h-3",
+                    pinned ? "fill-rose-600 text-rose-400" : "",
+                  ].join(" ")}
+                />
+              </button>
+            </div>
+          </LessonDraggable>
         );
       })}
     </div>

@@ -45,16 +45,16 @@ export default function StudentPanel({
   return (
     <section
       className="
-      bg-white 
-      rounded-3xl
-      border border-slate-200
-      shadow-[0_4px_20px_rgba(0,0,0,0.05)]
-      flex flex-col
-      overflow-visible
-    "
+        bg-white
+        rounded-2xl
+        border border-slate-200
+        shadow-sm
+        flex flex-col
+        overflow-hidden
+      "
     >
       {/* Header */}
-      <div className="px-5 pt-4 pb-3 border-b border-slate-200 bg-white">
+      <div className="px-5 pt-4 pb-3 border-b border-slate-200 bg-transparent">
         <div className="flex items-center justify-between mb-3 pt-2">
           <div>
             <h2 className="text-base font-semibold text-slate-900 flex items-center gap-2">
@@ -82,7 +82,7 @@ export default function StudentPanel({
           </div>
         </div>
 
-        {/* Search + Tag filter: 4/5 vs 1/5 */}
+        {/* Search + Tag filter */}
         <div className="grid grid-cols-5 gap-2 mb-2">
           <div className="col-span-4 relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -129,10 +129,10 @@ export default function StudentPanel({
         </div>
       </div>
 
-      {/* Body: khoảng cao tương đương 7 thẻ, ẩn scrollbar nhưng vẫn scroll */}
+      {/* Body */}
       <div
         className="
-          flex-1 px-4 py-4 bg-white 
+          flex-1 px-4 py-4 bg-transparent
           overflow-auto 
           max-h-[545px]
           [scrollbar-width:none]

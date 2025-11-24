@@ -1,6 +1,8 @@
 import React, { useMemo } from "react";
 import dayjs from "dayjs";
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
+import { useDroppable } from "@dnd-kit/core";
+import { Trash2 } from "lucide-react";
 import ScheduleCell from "./ScheduleCell";
 import Button from "../../components/ui/Button";
 
@@ -15,14 +17,34 @@ const VN_DAY_FULL = [
   "Thứ bảy",
 ];
 
+function TrashDropZone({ visible }) {
+  const { setNodeRef, isOver } = useDroppable({ id: "trash" });
+
+  if (!visible) return null;
+
+  const base =
+    "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition";
+  const state = isOver
+    ? "bg-rose-50 border-rose-300 text-rose-700"
+    : "bg-white border-slate-300 text-slate-500 hover:bg-slate-50";
+
+  return (
+    <button ref={setNodeRef} type="button" className={`${base} ${state}`}>
+      <Trash2 className="w-3.5 h-3.5" />
+      <span>Hủy thẻ</span>
+    </button>
+  );
+}
+
 export default function CalendarGrid({
-  lessons,
+  lessons = [],
   weekStart,
   weekLabel,
   onPrevWeek,
   onNextWeek,
   onToday,
   onPinLesson,
+  isDragging,
 }) {
   const today = dayjs();
 
@@ -53,7 +75,7 @@ export default function CalendarGrid({
   }, [lessons, weekStart]);
 
   return (
-    <section className="mt-2.5 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+    <section className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
       {/* Header lịch (tiêu đề + nút tuần trước / sau) */}
       <div className="border-b border-slate-200 px-6 py-4 bg-white">
         <div className="flex items-center justify-between gap-4">
@@ -65,12 +87,13 @@ export default function CalendarGrid({
               <p className="text-xs text-slate-500 mt-0.5">{weekLabel}</p>
             </div>
 
-            <button
-              onClick={onToday}
-              className="hidden sm:inline-flex items-center rounded-full border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 transition"
-            >
-              Hôm nay
-            </button>
+            <div className="flex items-center gap-2">
+              <Button onClick={onToday} variant="redSoft" size="sm">
+                Hôm nay
+              </Button>
+
+              <TrashDropZone visible={isDragging} />
+            </div>
           </div>
 
           <div className="flex items-center gap-3">
@@ -88,10 +111,10 @@ export default function CalendarGrid({
 
               {/* Nút tuần sau */}
               <Button
-                variant="primary"
+                variant="greenSoft"
                 size="sm"
                 onClick={onNextWeek}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-slate-900 hover:bg-slate-800"
+                className="flex items-center gap-1.5 px-4 py-2 rounded-full"
               >
                 <span>Tuần sau</span>
                 <LuChevronRight className="w-4 h-4" />
@@ -184,7 +207,7 @@ export default function CalendarGrid({
                       hour={hour}
                       lessons={slotLessons}
                       isAltRow={isAltRow}
-                      onPinLesson={onPinLesson} // THÊM
+                      onPinLesson={onPinLesson}
                     />
                   );
                 })}
