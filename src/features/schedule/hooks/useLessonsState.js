@@ -185,11 +185,16 @@ export function useLessonsState({ students, weekStart, toast }) {
     []
   );
 
+  const removeLesson = useCallback((lessonId) => {
+    setLessons((prev) => prev.filter((l) => l.id !== lessonId));
+  }, []);
+
   return {
     lessons,
     createLessonFromStudentSlot,
     moveSingleLesson,
     togglePinLesson,
     movePinnedSeries,
+    removeLesson,
   };
 }

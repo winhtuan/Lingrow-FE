@@ -1,17 +1,17 @@
 // src/features/schedule/components/DraggableStudentCard.jsx
 import React from "react";
 import { useDraggable } from "@dnd-kit/core";
-import { CSS } from "@dnd-kit/utilities";
 import StudentCard from "./StudentCard";
 
 export default function DraggableStudentCard({ student, onEdit, onDelete }) {
-  const { attributes, listeners, setNodeRef, transform, isDragging } =
-    useDraggable({
-      id: student.id,
-    });
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id: student.id,
+  });
 
   const style = {
-    transform: transform ? CSS.Translate.toString(transform) : undefined,
+    // Ẩn thẻ gốc khi đang kéo, để chỉ còn DragOverlay
+    opacity: isDragging ? 0 : 1,
+    cursor: isDragging ? "grabbing" : "grab",
   };
 
   return (

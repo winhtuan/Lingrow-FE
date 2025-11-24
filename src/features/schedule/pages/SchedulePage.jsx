@@ -70,6 +70,7 @@ export default function SchedulePage() {
     moveSingleLesson,
     togglePinLesson,
     movePinnedSeries,
+    removeLesson,
   } = useLessonsState({ students, weekStart, toast });
 
   // quản lý dialog buổi đã ghim
@@ -99,6 +100,7 @@ export default function SchedulePage() {
     createLessonFromStudentSlot,
     moveSingleLesson,
     requestPinnedMove,
+    removeLesson,
     toast,
   });
 
