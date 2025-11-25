@@ -11,18 +11,55 @@ import ClassroomHome from "../../features/classroom/pages/ClassroomHome";
 // SCHEDULE
 import SchedulePage from "../../features/schedule/pages/SchedulePage";
 
+import GuestRoute from "./GuestRoute";
+import ProtectedRoute from "./ProtectedRoute";
+
 const AppRoutes = () => {
   return (
     <Routes>
-      <Route path="/signin" element={<LoginPage />} />
-      <Route path="/signup" element={<SignUpPage />} />
+      {/* Guest only */}
+      <Route
+        path="/signin"
+        element={
+          <GuestRoute>
+            <LoginPage />
+          </GuestRoute>
+        }
+      />
+      <Route
+        path="/signup"
+        element={
+          <GuestRoute>
+            <SignUpPage />
+          </GuestRoute>
+        }
+      />
+
+      {/* Callback: thường để public, vì nó sẽ tự xử lý token rồi setUser */}
       <Route path="/auth/callback" element={<AuthCallbackPage />} />
-      <Route path="/verify-email" element={<VerifyEmailPage />} />
 
-      <Route path="/schedule" element={<SchedulePage />} />
-      {/* <Route path="/error" element={<ErrorPage />} /> */}
+      {/* Cần đăng nhập */}
+      <Route
+        path="/verify-email"
+        element={
+          <ProtectedRoute>
+            <VerifyEmailPage />
+          </ProtectedRoute>
+        }
+      />
 
+      <Route
+        path="/schedule"
+        element={
+          <ProtectedRoute>
+            <SchedulePage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route path="/home" element={<ClassroomHome />} />
       <Route path="/" element={<ClassroomHome />} />
+
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
