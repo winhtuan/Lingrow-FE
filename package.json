@@ -28,9 +28,7 @@
     "tw:build": "npx @tailwindcss/cli -i ./src/styles/index.css -o ./public/tailwind.css -m",
     "start": "concurrently \"npm:tw:dev\" \"react-scripts start\"",
     "prebuild": "npm run tw:build",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "build": "react-scripts build"
   },
   "eslintConfig": {
     "extends": [

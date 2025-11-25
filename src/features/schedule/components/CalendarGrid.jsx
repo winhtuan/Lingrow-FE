@@ -2,8 +2,6 @@
 import React, { useMemo } from "react";
 import dayjs from "dayjs";
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
-import { useDroppable } from "@dnd-kit/core";
-import { Trash2 } from "lucide-react";
 import ScheduleCell from "./ScheduleCell";
 import Button from "../../../ui/Button";
 
@@ -17,25 +15,6 @@ const VN_DAY_FULL = [
   "Thứ sáu",
   "Thứ bảy",
 ];
-
-function TrashDropZone({ visible }) {
-  const { setNodeRef, isOver } = useDroppable({ id: "trash" });
-
-  if (!visible) return null;
-
-  const base =
-    "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition";
-  const state = isOver
-    ? "bg-rose-50 border-rose-300 text-rose-700"
-    : "bg-white border-slate-300 text-slate-500 hover:bg-slate-50";
-
-  return (
-    <button ref={setNodeRef} type="button" className={`${base} ${state}`}>
-      <Trash2 className="w-3.5 h-3.5" />
-      <span>Hủy thẻ</span>
-    </button>
-  );
-}
 
 export default function CalendarGrid({
   lessons = [],
@@ -92,8 +71,6 @@ export default function CalendarGrid({
               <Button onClick={onToday} variant="redSoft" size="sm">
                 Hôm nay
               </Button>
-
-              <TrashDropZone visible={isDragging} />
             </div>
           </div>
 

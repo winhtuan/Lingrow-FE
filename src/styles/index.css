@@ -26,7 +26,7 @@ code {
 
   /* các màu pastel custom */
   .bg-amber-soft {
-    background-color: color-mix(in oklab, var(--color-amber-600) 16%, white);
+    background-color: color-mix(in oklab, var(--color-amber-500) 16%, white);
   }
   .border-amber-soft {
     border-color: color-mix(in oklab, var(--color-amber-600) 40%, white);

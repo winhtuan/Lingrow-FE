@@ -2,6 +2,7 @@
 import React, { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
+import Button from "./Button";
 
 export default function Modal({
   open,
@@ -43,13 +44,14 @@ export default function Modal({
         >
           <div className="flex items-center justify-between px-8 pt-7 pb-6">
             <h3 className="text-2xl font-bold text-slate-900">{title}</h3>
-            <button
+            <Button
               onClick={onClose}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all duration-200"
+              variant="redSoft"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full text-red-800 transition-all duration-200"
               aria-label="Close"
             >
               <X className="h-5 w-5" />
-            </button>
+            </Button>
           </div>
           <div className="px-8 pb-8">{children}</div>
         </div>

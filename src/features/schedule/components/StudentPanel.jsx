@@ -2,9 +2,10 @@
 import React from "react";
 import { Plus, Search, User } from "lucide-react";
 import DraggableStudentCard from "./DraggableStudentCard";
+import Select from "../../../ui/Select";
 
 const TAG_OPTIONS = [
-  { value: "all", label: "Tất cả tag" },
+  { value: "all", label: "Tất cả" },
   { value: "eng", label: "Tiếng Anh" },
   { value: "code", label: "Tin học" },
   { value: "math", label: "Toán học" },
@@ -83,48 +84,38 @@ export default function StudentPanel({
         </div>
 
         {/* Search + Tag filter */}
-        <div className="grid grid-cols-5 gap-2 mb-2">
-          <div className="col-span-4 relative">
+        <div className="flex items-center gap-2 mb-2">
+          {/* Search bên trái, chiếm rộng */}
+          <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
               value={query}
               onChange={(e) => onQueryChange(e.target.value)}
               placeholder="Tìm kiếm học sinh..."
               className="
-                w-full rounded-xl
-                border border-slate-200
-                bg-white
-                pl-10 pr-4 py-2.5
-                text-sm text-slate-900
-                placeholder:text-slate-400
-                outline-none
-                focus:ring-2 focus:ring-slate-200 focus:border-slate-300
-                transition
-              "
+        w-full rounded-xl
+        border border-slate-200
+        bg-white
+        pl-10 pr-4 py-2.5
+        text-sm text-slate-900
+        placeholder:text-slate-400
+        outline-none
+        focus:ring-2 focus:ring-slate-200 focus:border-slate-300
+        transition
+      "
             />
           </div>
 
-          <div className="col-span-1">
-            <select
+          {/* Dropdown Tag bên phải */}
+          <div className="shrink-0 w-[120px]">
+            <Select
+              options={TAG_OPTIONS}
               value={tagFilter}
-              onChange={(e) => onTagFilterChange(e.target.value)}
-              className="
-                w-full rounded-xl
-                border border-slate-200
-                bg-white
-                px-3 py-2.5
-                text-xs sm:text-sm text-slate-700
-                outline-none
-                focus:ring-2 focus:ring-slate-200 focus:border-slate-300
-                cursor-pointer
-              "
-            >
-              {TAG_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
+              onChange={onTagFilterChange}
+              placeholder="Tag"
+              align="right"
+              className="w-full"
+            />
           </div>
         </div>
       </div>

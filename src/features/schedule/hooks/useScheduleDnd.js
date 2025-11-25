@@ -46,21 +46,7 @@ export function useScheduleDnd({
         return;
       }
 
-      // 2) THẢ VÀO THÙNG RÁC
-      if (overId === "trash") {
-        if (activeIdStr.startsWith("lesson-")) {
-          // nếu là lesson -> xóa lesson
-          removeLesson?.(activeIdStr);
-          toast?.success?.("Đã xoá buổi học khỏi lịch");
-        } else {
-          // nếu là thẻ học sinh -> chỉ hủy kéo
-          toast?.info?.("Đã hủy kéo thẻ");
-        }
-        setActiveId(null);
-        return;
-      }
-
-      // 3) KÉO LESSON TRONG LỊCH
+      // 2) KÉO LESSON TRONG LỊCH
       if (activeIdStr.startsWith("lesson-")) {
         const lesson = lessons.find((l) => String(l.id) === activeIdStr);
         if (!lesson) {
@@ -103,7 +89,7 @@ export function useScheduleDnd({
         return;
       }
 
-      // 4) KÉO THẺ HỌC SINH TỪ PANEL -> tạo lesson mới khi thả lên slot
+      // 3) KÉO THẺ HỌC SINH TỪ PANEL -> tạo lesson mới khi thả lên slot
       if (overId.startsWith("slot-")) {
         const [, dayIndexStr, hourStr] = overId.split("-");
         const dayIndex = Number(dayIndexStr);
