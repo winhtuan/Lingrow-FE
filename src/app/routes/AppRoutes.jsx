@@ -10,6 +10,8 @@ import ErrorPage from "../../shared/components/navigation/ErrorPage";
 import ClassroomHome from "../../features/classroom/pages/ClassroomHome";
 // SCHEDULE
 import SchedulePage from "../../features/schedule/pages/SchedulePage";
+// TUTOR
+import TutorHomePage from "../../features/tutor/pages/TutorHomePage";
 
 import GuestRoute from "./GuestRoute";
 import ProtectedRoute from "./ProtectedRoute";
@@ -42,18 +44,19 @@ const AppRoutes = () => {
       <Route path="/error" element={<ErrorPage />} />
 
       {/* Protected routes */}
-      <Route
+      {/* <Route
         path="/schedule"
         element={
           <ProtectedRoute>
             <SchedulePage />
           </ProtectedRoute>
         }
-      />
+      /> */}
+      <Route path="/schedule" element={<SchedulePage />} />
 
       {/* Classroom routes */}
       <Route path="/home" element={<ClassroomHome />} />
-      <Route path="/" element={<ClassroomHome />} />
+      <Route path="/" element={<TutorHomePage />} />
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

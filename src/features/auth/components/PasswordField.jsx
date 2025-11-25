@@ -1,7 +1,7 @@
 // src/ui/PasswordField.jsx
 import React, { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
-import Field from "./Field";
+import Field from "../../../ui/Field";
 
 export default function PasswordField({
   id = "password",

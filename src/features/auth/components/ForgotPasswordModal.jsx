@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import Modal from "../../../ui/Modal";
 import Field from "../../../ui/Field";
-import PasswordField from "../../../ui/PasswordField";
+import PasswordField from "./PasswordField";
 import Button from "../../../ui/Button";
-import OtpInput from "../../../ui/OtpInput";
+import OtpInput from "./OtpInput";
 import { useToast } from "../../../ui/Toast";
 import {
   passwordScore,
@@ -11,7 +11,7 @@ import {
   passwordChecks,
   allChecksOk,
 } from "../../../utils/passwordStrength";
-import { StrengthBar, Requirement } from "../../../ui/PasswordStrength";
+import { StrengthBar, Requirement } from "./PasswordStrength";
 
 export default function ForgotPasswordModal({
   open,

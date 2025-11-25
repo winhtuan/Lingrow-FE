@@ -5,9 +5,9 @@ import { useNavigate } from "react-router-dom";
 import AuthLeft from "../components/AuthLeft";
 import Button from "../../../ui/Button";
 import Field from "../../../ui/Field";
-import PasswordField from "../../../ui/PasswordField";
+import PasswordField from "../components/PasswordField";
 import SocialButton from "../components/SocialButton";
-import DateOfBirthField from "../../../ui/DateOfBirthField";
+import DateOfBirthField from "../components//DateOfBirthField";
 import StepAnimator from "../../../shared/components/motion/StepAnimator";
 import Stepper from "../../../ui/Stepper";
 
@@ -17,7 +17,7 @@ import {
   passwordChecks,
   allChecksOk,
 } from "../../../utils/passwordStrength";
-import { StrengthBar, Requirement } from "../../../ui/PasswordStrength";
+import { StrengthBar, Requirement } from "../components/PasswordStrength";
 import { useSignUp } from "../hooks/useSignUp";
 
 export default function SignUpPage() {

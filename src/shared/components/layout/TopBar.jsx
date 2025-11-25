@@ -28,7 +28,7 @@ export default function TopBar({
   onOpenProfile,
   onOpenSettings,
   onOpenShortcuts,
-  onLogout, // vẫn nhận từ ngoài nếu muốn custom
+  onLogout,
   theme = "system",
   onChangeTheme,
 }) {
@@ -38,7 +38,7 @@ export default function TopBar({
   const bellRef = useRef(null);
 
   const navigate = useNavigate();
-  const { user } = useAuth(); // lấy user từ context
+  const { user } = useAuth();
   const { logout } = useLogout();
 
   const notifications = [

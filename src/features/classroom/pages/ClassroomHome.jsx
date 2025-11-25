@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 
 import TopBar from "../../../shared/components/layout/TopBar";
-import Sidebar from "../components/Sidebar";
+import Sidebar from "../../../shared/components/layout/Sidebar";
 import CreateClassModal from "../components/CreateClassModal";
 
 import SortSelect from "../components/controls/SortSelect";

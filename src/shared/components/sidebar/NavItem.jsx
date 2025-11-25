@@ -1,4 +1,4 @@
-// src/features/classroom/components/NavItem.jsx
+// src/shared/components/sidebar/NavItem.jsx
 import React from "react";
 import { Link } from "react-router-dom";
 

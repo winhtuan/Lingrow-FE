@@ -8,6 +8,7 @@ import CreateStudentModal from "../components/CreateStudentModal";
 import PinnedMoveDialog from "../components/PinnedMoveDialog";
 
 import TopBar from "../../../shared/components/layout/TopBar";
+import TutorSidebar from "../../tutor/components/TutorSidebar";
 import { useStudents } from "../../../shared/hooks/useStudents";
 import { useWeekNavigation } from "../hooks/useWeekNavigation";
 import { useToast } from "../../../ui/Toast";
@@ -18,6 +19,10 @@ import { useScheduleDnd } from "../hooks/useScheduleDnd";
 
 export default function SchedulePage() {
   const toast = useToast();
+
+  // state sidebar
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
 
   // quản lý học sinh
   const {
@@ -132,63 +137,80 @@ export default function SchedulePage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <TopBar />
-      <div className="h-16" />
+      <TopBar
+        sidebarOpen={sidebarOpen}
+        onToggleSidebar={() => setSidebarOpen((v) => !v)}
+        sidebarCollapsed={collapsed}
+        onToggleCollapse={() => setCollapsed((v) => !v)}
+        onOpenCreate={() => setCreateOpen(true)}
+      />
 
-      <DndWrapper
-        activeStudent={activeStudent}
-        activeLesson={activeLesson}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
-        onDragCancel={handleDragCancel}
-      >
-        <main className="px-6 lg:px-12 pb-10 pt-4">
-          <div
-            className="grid items-start gap-6"
-            style={{ gridTemplateColumns: "minmax(280px,340px) 1fr" }}
-          >
-            <StudentPanel
-              students={filteredStudents}
-              totalCount={students.length}
-              query={studentQuery}
-              onQueryChange={setStudentQuery}
-              tagFilter={tagFilter}
-              onTagFilterChange={setTagFilter}
-              onOpenCreate={() => setCreateOpen(true)}
-            />
-
-            <CalendarGrid
-              lessons={lessons}
-              weekStart={weekStart}
-              weekLabel={weekLabel}
-              onPrevWeek={prevWeek}
-              onNextWeek={nextWeek}
-              onToday={todayWeek}
-              onPinLesson={togglePinLesson}
-              isDragging={!!activeStudent}
-            />
-          </div>
-        </main>
-
-        <CreateStudentModal
-          open={createOpen}
-          onClose={() => setCreateOpen(false)}
-          newName={newName}
-          setNewName={setNewName}
-          newNote={newNote}
-          setNewNote={setNewNote}
-          newTag={newTag}
-          setNewTag={setNewTag}
-          onSubmit={handleCreate}
+      <div className="pt-16 flex">
+        {/* Sidebar gia sư */}
+        <TutorSidebar
+          open={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+          collapsed={collapsed}
+          classes={[]} // hiện tại Sidebar không dùng, có thể bỏ trống
+          activeKey="schedule"
         />
 
-        <PinnedMoveDialog
-          move={pendingPinnedMove}
-          onCancel={cancelPinnedMove}
-          onOnlyThis={handlePinnedMoveOnlyThis}
-          onSeries={handlePinnedMoveSeries}
-        />
-      </DndWrapper>
+        {/* Nội dung chính + DnD */}
+        <DndWrapper
+          activeStudent={activeStudent}
+          activeLesson={activeLesson}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+          onDragCancel={handleDragCancel}
+        >
+          <main className="flex-1 px-6 lg:px-6 pb-4 pt-4">
+            <div
+              className="grid items-start gap-6"
+              style={{ gridTemplateColumns: "minmax(280px,340px) 1fr" }}
+            >
+              <StudentPanel
+                students={filteredStudents}
+                totalCount={students.length}
+                query={studentQuery}
+                onQueryChange={setStudentQuery}
+                tagFilter={tagFilter}
+                onTagFilterChange={setTagFilter}
+                onOpenCreate={() => setCreateOpen(true)}
+              />
+
+              <CalendarGrid
+                lessons={lessons}
+                weekStart={weekStart}
+                weekLabel={weekLabel}
+                onPrevWeek={prevWeek}
+                onNextWeek={nextWeek}
+                onToday={todayWeek}
+                onPinLesson={togglePinLesson}
+                isDragging={!!activeStudent}
+              />
+            </div>
+          </main>
+
+          <CreateStudentModal
+            open={createOpen}
+            onClose={() => setCreateOpen(false)}
+            newName={newName}
+            setNewName={setNewName}
+            newNote={newNote}
+            setNewNote={setNewNote}
+            newTag={newTag}
+            setNewTag={setNewTag}
+            onSubmit={handleCreate}
+          />
+
+          <PinnedMoveDialog
+            move={pendingPinnedMove}
+            onCancel={cancelPinnedMove}
+            onOnlyThis={handlePinnedMoveOnlyThis}
+            onSeries={handlePinnedMoveSeries}
+          />
+        </DndWrapper>
+      </div>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 // src/ui/DateOfBirthField.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import { Calendar } from "lucide-react";
-import Select from "../ui/Select";
+import Select from "../../../ui/Select";
 
 const months = [
   { value: 1, label: "January" },

@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import Field from "../../../ui/Field";
-import PasswordField from "../../../ui/PasswordField";
+import PasswordField from "../components/PasswordField";
 import Button from "../../../ui/Button";
 import { useToast } from "../../../ui/Toast";
 

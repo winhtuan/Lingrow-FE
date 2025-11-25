@@ -44,13 +44,14 @@ export default function ProtectedRoute({ children }) {
       return null;
     }
 
-    // Trường hợp guest nhảy thẳng vào /schedule, /verify-email
+    // Guest nhảy thẳng vào /schedule, /verify-email, ...
     return (
       <>
         <ClassroomHome />
         <LoginRequiredModal
           open={showPrompt}
           onClose={() => setShowPrompt(false)}
+          fallbackPath="/home"
         />
       </>
     );
