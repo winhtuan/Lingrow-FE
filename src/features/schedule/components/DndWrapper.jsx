@@ -8,6 +8,9 @@ import {
   pointerWithin,
   DragOverlay,
 } from "@dnd-kit/core";
+
+import { snapCenterToCursor } from "@dnd-kit/modifiers";
+
 import StudentCard from "./StudentCard";
 
 function LessonOverlayCard({ lesson }) {
@@ -57,7 +60,8 @@ export default function DndWrapper({
     >
       {children}
 
-      <DragOverlay>
+      {/** ép overlay luôn neo chính giữa con trỏ */}
+      <DragOverlay modifiers={[snapCenterToCursor]}>
         {activeStudent ? (
           <StudentCard
             student={activeStudent}
