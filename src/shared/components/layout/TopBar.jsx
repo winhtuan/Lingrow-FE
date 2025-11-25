@@ -14,6 +14,7 @@ import { useAuth } from "../../../app/providers/AuthProvider";
 import UserMenu from "./UserMenu";
 import NotificationMenu from "../navigation/NotificationMenu";
 import fav from "../../../assets/images/fav.jpg";
+import { useLogout } from "../../../features/auth/hooks/useLogout";
 
 export default function TopBar({
   sidebarOpen,
@@ -27,7 +28,7 @@ export default function TopBar({
   onOpenProfile,
   onOpenSettings,
   onOpenShortcuts,
-  onLogout,
+  onLogout, // vẫn nhận từ ngoài nếu muốn custom
   theme = "system",
   onChangeTheme,
 }) {
@@ -38,6 +39,7 @@ export default function TopBar({
 
   const navigate = useNavigate();
   const { user } = useAuth(); // lấy user từ context
+  const { logout } = useLogout();
 
   const notifications = [
     {
@@ -58,6 +60,15 @@ export default function TopBar({
 
   const displayName = user?.fullName || user?.name || user?.email || "User";
   const avatarLetter = displayName.charAt(0).toUpperCase();
+
+  // Hàm logout dùng trong UI: ưu tiên prop, nếu không có thì dùng hook
+  const handleLogout = () => {
+    if (onLogout) {
+      onLogout();
+    } else {
+      logout(); // dùng mặc định: redirect /signin + logout Cognito
+    }
+  };
 
   return (
     <header className="fixed top-0 inset-x-0 h-16 bg-white/80 backdrop-blur border-b border-gray-200 z-50">
@@ -167,7 +178,7 @@ export default function TopBar({
                 onOpenProfile={onOpenProfile}
                 onOpenSettings={onOpenSettings}
                 onOpenShortcuts={onOpenShortcuts}
-                onLogout={onLogout}
+                onLogout={handleLogout}
               />
             </div>
           )}

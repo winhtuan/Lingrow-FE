@@ -19,7 +19,10 @@ export function getSocialLoginUrl(provider) {
     redirect_uri: redirectUri,
     identity_provider: provider,
     scope: "openid email profile",
-    state: provider, // để biết đang login bằng provider nào (nếu cần về sau)
+    state: provider,
+    // thêm dòng này: luôn bắt Google hiển thị màn chọn tài khoản
+    prompt: "select_account",
+    // nếu muốn bắt nhập lại mật khẩu luôn thì dùng: prompt: "login",
   });
 
   return `${base}?${params.toString()}`;
