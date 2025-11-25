@@ -5,7 +5,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "../../features/auth/pages/LoginPage";
 import SignUpPage from "../../features/auth/pages/SignUpPage";
 import AuthCallbackPage from "../../features/auth/pages/AuthCallbackPage";
-import VerifyEmailPage from "../../features/auth/pages/VerifyEmailPage";
+import ErrorPage from "../../shared/components/navigation/ErrorPage";
 // CLASSROOM
 import ClassroomHome from "../../features/classroom/pages/ClassroomHome";
 // SCHEDULE
@@ -38,16 +38,10 @@ const AppRoutes = () => {
       {/* Callback: thường để public, vì nó sẽ tự xử lý token rồi setUser */}
       <Route path="/auth/callback" element={<AuthCallbackPage />} />
 
-      {/* Cần đăng nhập */}
-      <Route
-        path="/verify-email"
-        element={
-          <ProtectedRoute>
-            <VerifyEmailPage />
-          </ProtectedRoute>
-        }
-      />
+      {/* Trang lỗi dùng chung */}
+      <Route path="/error" element={<ErrorPage />} />
 
+      {/* Protected routes */}
       <Route
         path="/schedule"
         element={
@@ -57,6 +51,7 @@ const AppRoutes = () => {
         }
       />
 
+      {/* Classroom routes */}
       <Route path="/home" element={<ClassroomHome />} />
       <Route path="/" element={<ClassroomHome />} />
 

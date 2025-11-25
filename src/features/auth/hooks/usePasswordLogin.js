@@ -45,16 +45,40 @@ export function usePasswordLogin() {
             setUser(data);
           } else {
             console.warn("Fetch /auth/me after login failed");
+
+            // Nếu BE trả về lỗi (403, 500,...) thì đẩy sang trang lỗi
+            // Ở đây mình đọc body text luôn, bạn có thể parse JSON rồi map vào payload
+            const text = await res.text();
+            navigate("/error", {
+              replace: true,
+              state: {
+                error: {
+                  status: res.status,
+                  message: text || "Fetch /auth/me failed.",
+                },
+              },
+            });
+            return;
           }
         } catch (err) {
           console.error("Fetch /auth/me error:", err);
+          // Điều hướng sang trang lỗi với message thật từ err
+          navigate("/error", {
+            replace: true,
+            state: { error: err },
+          });
+          return;
         }
 
         toast.success("Signed in successfully.");
         navigate("/", { replace: true });
       } catch (err) {
         console.error("Login error:", err);
-        toast.error(err.message || "Login failed.");
+        // Bỏ toast, dùng hẳn trang lỗi
+        navigate("/error", {
+          replace: true,
+          state: { error: err },
+        });
       } finally {
         setLoading(false);
       }

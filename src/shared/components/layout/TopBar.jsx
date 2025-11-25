@@ -12,7 +12,7 @@ import { useNavigate } from "react-router-dom";
 import Button from "../../../ui/Button";
 import { useAuth } from "../../../app/providers/AuthProvider";
 import UserMenu from "./UserMenu";
-import NotificationMenu from "../navigation/NotificationMenu";
+import NotificationMenu from "./NotificationMenu";
 import fav from "../../../assets/images/fav.jpg";
 import { useLogout } from "../../../features/auth/hooks/useLogout";
 

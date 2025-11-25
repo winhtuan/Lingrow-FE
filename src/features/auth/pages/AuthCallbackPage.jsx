@@ -40,7 +40,6 @@ export default function AuthCallbackPage() {
 
     const syncUser = async () => {
       try {
-        // ƯU TIÊN idToken cho /auth/me vì nó có email
         const bearer = idToken || accessToken;
 
         const res = await fetch(`${API_BASE.replace(/\/+$/, "")}/auth/me`, {
@@ -53,13 +52,25 @@ export default function AuthCallbackPage() {
 
         if (!res.ok) {
           const text = await res.text();
-          console.warn("Sync user failed:", res.status, text);
+          navigate("/error", {
+            replace: true,
+            state: {
+              error: {
+                status: res.status,
+                message: text || "Sync user failed.",
+              },
+            },
+          });
+          return;
         }
+
+        // ok thì về home
+        navigate("/", { replace: true });
       } catch (e) {
-        console.error("Error calling /auth/me:", e);
-      } finally {
-        // Sau khi sync (thành công hoặc fail), đi bước verify email
-        navigate("/verify-email", { replace: true });
+        navigate("/error", {
+          replace: true,
+          state: { error: e },
+        });
       }
     };
 
