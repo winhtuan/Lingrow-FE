@@ -1,12 +1,6 @@
 // src/shared/components/layout/TopBar.jsx
 import React, { useRef, useState } from "react";
-import {
-  LuMenu,
-  LuPlus,
-  LuBell,
-  LuChevronLeft,
-  LuChevronRight,
-} from "react-icons/lu";
+import { LuMenu, LuPlus, LuBell } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
 
 import Button from "../../../ui/Button";
@@ -19,8 +13,6 @@ import { useLogout } from "../../../features/auth/hooks/useLogout";
 export default function TopBar({
   sidebarOpen,
   onToggleSidebar,
-  sidebarCollapsed,
-  onToggleCollapse,
   query,
   onQuery,
   onOpenCreate,
@@ -61,12 +53,11 @@ export default function TopBar({
   const displayName = user?.fullName || user?.name || user?.email || "User";
   const avatarLetter = displayName.charAt(0).toUpperCase();
 
-  // Hàm logout dùng trong UI: ưu tiên prop, nếu không có thì dùng hook
   const handleLogout = () => {
     if (onLogout) {
       onLogout();
     } else {
-      logout(); // dùng mặc định: redirect /signin + logout Cognito
+      logout();
     }
   };
 
@@ -82,22 +73,6 @@ export default function TopBar({
             aria-label={sidebarOpen ? "Đóng menu" : "Mở menu"}
           >
             <LuMenu className="w-5 h-5 text-gray-700" />
-          </button>
-
-          {/* Desktop collapse button */}
-          <button
-            onClick={onToggleCollapse}
-            className="hidden lg:flex p-2 hover:bg-gray-100 rounded-full transition-colors"
-            aria-label={
-              sidebarCollapsed ? "Mở rộng sidebar" : "Thu gọn sidebar"
-            }
-            title={sidebarCollapsed ? "Mở rộng sidebar" : "Thu gọn sidebar"}
-          >
-            {sidebarCollapsed ? (
-              <LuChevronRight className="w-5 h-5 text-gray-700" />
-            ) : (
-              <LuChevronLeft className="w-5 h-5 text-gray-700" />
-            )}
           </button>
 
           {/* Logo */}

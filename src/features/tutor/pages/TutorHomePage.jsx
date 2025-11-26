@@ -71,14 +71,14 @@ const demoSchedule = [
 
 export default function TutorHomePage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const today = dayjs();
-  const weekday = today.format("dddd"); // Thứ ...
+  const weekday = today.format("dddd");
   const dateLabel = today.format("DD/MM");
 
   const toggleSidebar = () => setSidebarOpen((v) => !v);
-  const toggleCollapse = () => setCollapsed((v) => !v);
+  const toggleCollapse = () => setSidebarCollapsed((v) => !v);
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -86,8 +86,6 @@ export default function TutorHomePage() {
       <TopBar
         sidebarOpen={sidebarOpen}
         onToggleSidebar={toggleSidebar}
-        sidebarCollapsed={collapsed}
-        onToggleCollapse={toggleCollapse}
         onOpenCreate={() => {
           // sau này mở modal tạo lớp/buổi học
         }}
@@ -98,7 +96,8 @@ export default function TutorHomePage() {
         <TutorSidebar
           open={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
-          collapsed={collapsed}
+          collapsed={sidebarCollapsed}
+          onToggleCollapse={toggleCollapse}
           activeKey="classes" // trang home cho gia sư xoay quanh lớp học
         />
 
@@ -136,11 +135,9 @@ export default function TutorHomePage() {
                         key={cls.id}
                         className="bg-slate-50 rounded-2xl border border-slate-200 overflow-hidden flex flex-col"
                       >
-                        {/* Placeholder ảnh */}
                         <div className="h-24 bg-slate-100 flex items-center justify-center text-slate-300 text-xs">
                           Hình minh họa lớp
                         </div>
-                        {/* Nội dung */}
                         <div className="flex-1 p-4 flex flex-col gap-3">
                           <div className="space-y-1">
                             <h3 className="text-sm font-semibold text-slate-900 line-clamp-2">

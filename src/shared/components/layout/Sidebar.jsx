@@ -1,6 +1,6 @@
 // src/shared/components/layout/Sidebar.jsx
 import React from "react";
-import { LuX } from "react-icons/lu";
+import { LuX, LuChevronsLeft, LuChevronsRight } from "react-icons/lu";
 
 import { NavItem } from "../sidebar/index";
 
@@ -13,6 +13,7 @@ import { NavItem } from "../sidebar/index";
  * - menuItems: [{ key, label, icon, to }]
  * - footerItems: [{ key, label, icon, to }]
  * - activeKey / active: key đang active (ưu tiên activeKey)
+ * - onToggleCollapse: hàm toggle thu gọn/mở rộng sidebar (desktop)
  */
 export default function Sidebar({
   open,
@@ -23,6 +24,7 @@ export default function Sidebar({
   footerItems = [],
   activeKey,
   active, // để backward-compatible nếu chỗ khác vẫn dùng
+  onToggleCollapse,
 }) {
   const width = collapsed ? "lg:w-[72px]" : "lg:w-62";
   const currentActive = activeKey ?? active ?? menuItems[0]?.key;
@@ -39,6 +41,21 @@ export default function Sidebar({
       aria-hidden={!open && undefined}
     >
       <nav className={collapsed ? "py-3" : "p-3 space-y-1"}>
+        <NavItem
+          key="__collapse"
+          icon={
+            collapsed ? (
+              <LuChevronsRight className="w-5 h-5" />
+            ) : (
+              <LuChevronsLeft className="w-5 h-5" />
+            )
+          }
+          label={collapsed ? "Mở" : "Thu gọn"}
+          onClick={onToggleCollapse}
+          collapsed={collapsed}
+          active={false}
+        />
+
         {/* Main menu */}
         {menuItems.map((item) => (
           <NavItem

@@ -22,7 +22,7 @@ export default function SchedulePage() {
 
   // state sidebar
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [collapsed, setCollapsed] = useState(true);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
 
   // quản lý học sinh
   const {
@@ -135,13 +135,14 @@ export default function SchedulePage() {
     setNewTag("");
   };
 
+  const toggleSidebar = () => setSidebarOpen((v) => !v);
+  const toggleCollapse = () => setSidebarCollapsed((v) => !v);
+
   return (
     <div className="min-h-screen bg-slate-50">
       <TopBar
         sidebarOpen={sidebarOpen}
-        onToggleSidebar={() => setSidebarOpen((v) => !v)}
-        sidebarCollapsed={collapsed}
-        onToggleCollapse={() => setCollapsed((v) => !v)}
+        onToggleSidebar={toggleSidebar}
         onOpenCreate={() => setCreateOpen(true)}
       />
 
@@ -150,8 +151,9 @@ export default function SchedulePage() {
         <TutorSidebar
           open={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
-          collapsed={collapsed}
-          classes={[]} // hiện tại Sidebar không dùng, có thể bỏ trống
+          collapsed={sidebarCollapsed}
+          onToggleCollapse={toggleCollapse}
+          classes={[]}
           activeKey="schedule"
         />
 
