@@ -44,15 +44,14 @@ const AppRoutes = () => {
       <Route path="/error" element={<ErrorPage />} />
 
       {/* Protected routes */}
-      {/* <Route
+      <Route
         path="/schedule"
         element={
           <ProtectedRoute>
             <SchedulePage />
           </ProtectedRoute>
         }
-      /> */}
-      <Route path="/schedule" element={<SchedulePage />} />
+      />
 
       {/* Classroom routes */}
       <Route path="/home" element={<ClassroomHome />} />

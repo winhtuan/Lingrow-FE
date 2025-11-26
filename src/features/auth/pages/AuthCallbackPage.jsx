@@ -15,12 +15,17 @@ export default function AuthCallbackPage() {
     if (handledRef.current) return;
     handledRef.current = true;
 
-    const hash = window.location.hash.replace(/^#/, "");
+    // #access_token=...&id_token=...&...
+    const hash = window.location.hash.startsWith("#")
+      ? window.location.hash.substring(1)
+      : window.location.hash;
+
     const params = new URLSearchParams(hash);
 
     const accessToken = params.get("access_token");
     const idToken = params.get("id_token");
     const refreshToken = params.get("refresh_token");
+    // const state = params.get("state");
 
     if (!accessToken && !idToken) {
       toast.error("Social login failed. Please try again.");
@@ -37,6 +42,9 @@ export default function AuthCallbackPage() {
     if (refreshToken) {
       localStorage.setItem("refresh_token", refreshToken);
     }
+
+    // Xoá hash cho sạch URL
+    window.history.replaceState({}, document.title, window.location.pathname);
 
     const syncUser = async () => {
       try {
@@ -64,7 +72,7 @@ export default function AuthCallbackPage() {
           return;
         }
 
-        // ok thì về home
+        // Sync xong -> về trang chính (hoặc /schedule nếu bạn muốn)
         navigate("/", { replace: true });
       } catch (e) {
         navigate("/error", {

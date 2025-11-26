@@ -43,11 +43,7 @@ export async function api(path, options = {}) {
   }
 
   if (!res.ok) {
-    if (res.status === 401) {
-      // Token hết hạn hoặc sai
-      localStorage.clear();
-      window.location.href = "/signin";
-    }
+    // KHÔNG logout / redirect ở đây
     const msg = data?.error || data?.message || `HTTP ${res.status}`;
     const err = new Error(msg);
     err.status = res.status;

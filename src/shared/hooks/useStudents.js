@@ -1,12 +1,54 @@
 // src/shared/hooks/useStudents.js
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useToast } from "../../ui/Toast";
+import { useAuth } from "../../app/providers/AuthProvider";
+import {
+  fetchStudentCards,
+  createStudentCard,
+} from "../../features/schedule/utils/studentCardsApi";
+
+function mapCardToStudent(card) {
+  return {
+    id: card.id,
+    name: card.displayName,
+    note: card.notes,
+    tag: card.tags,
+    color: card.color || "blue",
+  };
+}
 
 export function useStudents(initial = []) {
   const toast = useToast();
+  const { user } = useAuth();
 
   const [students, setStudents] = useState(initial);
   const [studentQuery, setStudentQuery] = useState("");
+
+  // chỉ load 1 lần khi mount
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const cards = await fetchStudentCards();
+        if (cancelled) return;
+
+        const mapped = (cards || []).map(mapCardToStudent);
+        setStudents(mapped);
+      } catch (err) {
+        const msg =
+          err?.message ||
+          "Không thể tải danh sách thẻ học sinh. Vui lòng thử lại.";
+        // không cho toast vào deps nên dùng bình thường ở đây
+        toast.error(msg);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const filteredStudents = useMemo(
     () =>
@@ -18,22 +60,35 @@ export function useStudents(initial = []) {
     [students, studentQuery]
   );
 
-  const addStudent = ({ name, note, tag, color }) => {
-    const id = `s-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  const addStudent = useCallback(
+    async ({ name, note, tag, color }) => {
+      if (!user?.userId) {
+        toast.error("Không xác định được studentId. Vui lòng đăng nhập lại.");
+        return;
+      }
 
-    setStudents((prev) => [
-      ...prev,
-      {
-        id,
-        name,
-        note,
-        tag: tag || null,
-        color: color || "blue",
-      },
-    ]);
+      try {
+        const payload = {
+          studentId: user.userId,
+          displayName: name,
+          notes: note || null,
+          tags: tag || null,
+          color: color || "blue",
+        };
 
-    toast.success("Đã tạo thẻ học sinh");
-  };
+        const card = await createStudentCard(payload);
+        const student = mapCardToStudent(card);
+
+        setStudents((prev) => [...prev, student]);
+        toast.success("Đã tạo thẻ học sinh");
+      } catch (err) {
+        const msg = err?.message || "Không thể tạo thẻ học sinh.";
+        toast.error(msg);
+        throw err;
+      }
+    },
+    [user, toast]
+  );
 
   return {
     students,
