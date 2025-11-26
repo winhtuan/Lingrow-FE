@@ -76,7 +76,6 @@ export default function CalendarGrid({
 
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
-              {/* Nút tuần trước */}
               <Button
                 variant="outline"
                 size="sm"
@@ -87,7 +86,6 @@ export default function CalendarGrid({
                 <span>Tuần trước</span>
               </Button>
 
-              {/* Nút tuần sau */}
               <Button
                 variant="greenSoft"
                 size="sm"
@@ -102,21 +100,20 @@ export default function CalendarGrid({
         </div>
       </div>
 
-      {/* HÀNG THỨ / NGÀY – LUÔN CỐ ĐỊNH, KHÔNG NẰM TRONG VÙNG CUỘN */}
+      {/* HÀNG THỨ / NGÀY */}
       <div
         className="grid border-b border-slate-200 bg-white"
         style={{
           gridTemplateColumns: "60px repeat(7, minmax(0, 1fr))",
         }}
       >
-        {/* Ô "Giờ" bên trái */}
+        {/* Ô "Giờ" */}
         <div className="h-16 border-r border-slate-200 bg-slate-50 flex items-center justify-center text-[11px] font-semibold text-slate-500">
           Giờ
         </div>
 
-        {/* Các cột thứ / ngày */}
         {days.map((day) => {
-          const weekdayIndex = day.day(); // 0-6
+          const weekdayIndex = day.day();
           const isToday = day.isSame(today, "day");
           return (
             <div
@@ -149,7 +146,7 @@ export default function CalendarGrid({
         })}
       </div>
 
-      {/* PHẦN THÂN – CHỈ PHẦN NÀY ĐƯỢC CUỘN */}
+      {/* PHẦN THÂN (CUỘN) */}
       <div className="overflow-auto max-h-[calc(100vh-16rem)] scrollbar-none">
         <div
           className="grid bg-white"
@@ -174,10 +171,14 @@ export default function CalendarGrid({
                   {hour}:00
                 </div>
 
-                {/* 7 ô cho mỗi ngày */}
-                {days.map((_, dayIndex) => {
+                {/* 7 ô ngày */}
+                {days.map((day, dayIndex) => {
                   const key = `${dayIndex}-${hour}`;
                   const slotLessons = lessonsBySlot[key] || [];
+
+                  // ngày trong quá khứ
+                  const isPastDay = day.isBefore(today, "day");
+
                   return (
                     <ScheduleCell
                       key={key}
@@ -186,6 +187,7 @@ export default function CalendarGrid({
                       lessons={slotLessons}
                       isAltRow={isAltRow}
                       onPinLesson={onPinLesson}
+                      isPastDay={isPastDay}
                     />
                   );
                 })}

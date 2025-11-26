@@ -9,8 +9,6 @@ function LessonDraggable({ lesson, children }) {
   });
 
   const style = {
-    // rất quan trọng: ẩn card gốc khi đang kéo,
-    // để chỉ còn overlay nhìn, không bị cắt giữa 2 hàng
     opacity: isDragging ? 0 : 1,
     cursor: "grab",
   };
@@ -28,6 +26,7 @@ export default function ScheduleCell({
   lessons,
   isAltRow,
   onPinLesson,
+  isPastDay, // nhận từ CalendarGrid
 }) {
   const { setNodeRef, isOver } = useDroppable({
     id: `slot-${dayIndex}-${hour}`,
@@ -44,9 +43,15 @@ export default function ScheduleCell({
       className={`relative border-t border-slate-100 border-r min-h-[64px] px-1.5 py-1 transition-colors duration-150 ${bgClass}`}
     >
       {lessons.map((lesson) => {
-        const colorClass =
+        const normalColorClass =
           lesson.colorClass ||
           "bg-slate-900 text-white border border-slate-900";
+
+        // nếu là ngày quá khứ → dùng palette xám
+        const pastColorClass = [
+          "bg-slate-50 border border-slate-200 text-slate-400",
+          "hover:border-slate-300",
+        ].join(" ");
 
         const pinned = lesson.pinned;
 
@@ -57,7 +62,7 @@ export default function ScheduleCell({
                 "relative rounded-md text-xs px-2 py-3 pr-7 shadow-sm border",
                 "transition-all duration-150",
                 "min-h-[56px] flex flex-col justify-center",
-                colorClass,
+                isPastDay ? pastColorClass : normalColorClass,
                 pinned ? "ring-1 ring-slate-900/20" : "",
               ].join(" ")}
             >
