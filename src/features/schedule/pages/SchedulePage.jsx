@@ -31,29 +31,7 @@ export default function SchedulePage() {
     studentQuery,
     setStudentQuery,
     addStudent,
-  } = useStudents([
-    {
-      id: "s-1",
-      name: "Minh Nguyet",
-      note: "IELTS Fundamentals",
-      tag: "eng",
-      color: "blue",
-    },
-    {
-      id: "s-2",
-      name: "Hà Anh",
-      note: "Speaking Boost A2 → B1",
-      tag: "code",
-      color: "purple",
-    },
-    {
-      id: "s-3",
-      name: "Nam",
-      note: "Grammar B1",
-      tag: "math",
-      color: "green",
-    },
-  ]);
+  } = useStudents([]);
 
   // quản lý tuần
   const { weekStart, weekLabel, prevWeek, nextWeek, todayWeek } =

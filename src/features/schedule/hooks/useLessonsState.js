@@ -1,10 +1,13 @@
 // src/features/schedule/hooks/useLessonsState.js
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import dayjs from "dayjs";
 import {
+  fetchWeekSchedules,
+  mapScheduleToLesson,
   createSchedule,
   updateScheduleTime,
   deleteSchedule,
+  updateSchedulePinned,
 } from "../utils/scheduleApi";
 
 const STUDENT_COLOR_TO_CLASS = {
@@ -15,17 +18,97 @@ const STUDENT_COLOR_TO_CLASS = {
   rose: "bg-rose-50 border-rose-200 text-rose-900",
 };
 
-export function useLessonsState({ students, weekStart, toast }) {
+export function useLessonsState({ weekStart, students, toast }) {
   const [lessons, setLessons] = useState([]);
+  // để phân biệt "chưa load" và "đã load nhưng không có schedule"
+  const [schedules, setSchedules] = useState(null);
 
-  // tạo lesson mới khi thả 1 student card xuống 1 slot
+  // 1) CHỈ fetch schedules khi weekStart đổi
+  useEffect(() => {
+    if (!weekStart) return;
+
+    let cancelled = false;
+
+    const load = async () => {
+      try {
+        const weekStartIso = weekStart.startOf("day").toISOString();
+        const data = await fetchWeekSchedules(weekStartIso);
+        if (cancelled) return;
+        setSchedules(data || []);
+      } catch (err) {
+        const msg = err?.message || "Không thể tải lịch học. Vui lòng thử lại.";
+        toast?.error?.(msg);
+      }
+    };
+
+    load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [weekStart, toast]);
+
+  // 2) Map schedules + students thành lessons, giữ lại trạng thái pinned
+  useEffect(() => {
+    // chưa load xong hoặc chưa gọi API
+    if (schedules === null) return;
+
+    // tuần này BE không có schedule → giữ nguyên state cũ (không xóa pin)
+    if (schedules.length === 0) {
+      return;
+    }
+
+    const mapped = schedules.map((s) => {
+      const student = students.find(
+        (st) => String(st.id) === String(s.studentCardId)
+      );
+
+      const colorClass =
+        STUDENT_COLOR_TO_CLASS[student?.color] ?? STUDENT_COLOR_TO_CLASS.blue;
+
+      return mapScheduleToLesson(s, student, colorClass);
+    });
+
+    setLessons((prev) => {
+      // lesson cũ có scheduleId → dùng để giữ pinned
+      const prevByScheduleId = new Map();
+      for (const l of prev) {
+        if (l.scheduleId) {
+          prevByScheduleId.set(l.scheduleId, l);
+        }
+      }
+
+      // gộp trạng thái pinned từ prev vào mapped
+      const mappedWithPinned = mapped.map((m) => {
+        const old = prevByScheduleId.get(m.scheduleId);
+        if (!old) return m;
+        return {
+          ...m,
+          pinned: old.pinned ?? false,
+          isGeneratedFromPin: old.isGeneratedFromPin ?? false,
+        };
+      });
+
+      const newScheduleIds = new Set(mappedWithPinned.map((l) => l.scheduleId));
+
+      // giữ lại:
+      // - lesson local (scheduleId null, ví dụ series từ pin)
+      // - lesson cũ có scheduleId nhưng không còn trong batch mới
+      const localLessons = prev.filter(
+        (l) => !l.scheduleId || !newScheduleIds.has(l.scheduleId)
+      );
+
+      return [...localLessons, ...mappedWithPinned];
+    });
+  }, [schedules, students]);
+
+  // 3) Tạo lesson mới khi kéo thả thẻ học sinh
   const createLessonFromStudentSlot = useCallback(
     async ({ studentId, dayIndex, hour }) => {
       const student = students.find((s) => String(s.id) === String(studentId));
       if (!student) return;
 
       try {
-        // gọi BE tạo schedule, map về lesson cho FE
         const lesson = await createSchedule({
           student,
           weekStart,
@@ -43,21 +126,16 @@ export function useLessonsState({ students, weekStart, toast }) {
     [students, weekStart, toast]
   );
 
-  // move 1 lesson
+  // 4) Di chuyển 1 buổi (update FE trước, rồi gọi API)
   const moveSingleLesson = useCallback(
     async (lessonId, targetHour, targetDate, extra = {}) => {
       setLessons((prev) => {
         const exists = prev.find((l) => l.id === lessonId);
         if (!exists) return prev;
-        // optimistic update trước
+
         return prev.map((l) =>
           l.id === lessonId
-            ? {
-                ...l,
-                hour: targetHour,
-                date: targetDate,
-                ...extra,
-              }
+            ? { ...l, hour: targetHour, date: targetDate, ...extra }
             : l
         );
       });
@@ -67,13 +145,11 @@ export function useLessonsState({ students, weekStart, toast }) {
           .startOf("day")
           .diff(weekStart.startOf("day"), "day");
 
-        const lesson = ((prev) => prev.find((l) => l.id === lessonId))(lessons);
-
-        // nếu lesson chưa sync server (scheduleId null) thì bỏ qua phần API
-        if (!lesson?.scheduleId) return;
+        const current = lessons.find((l) => l.id === lessonId);
+        if (!current?.scheduleId) return;
 
         await updateScheduleTime({
-          lesson,
+          lesson: current,
           weekStart,
           dayIndex: targetDayIndex,
           hour: targetHour,
@@ -81,106 +157,128 @@ export function useLessonsState({ students, weekStart, toast }) {
       } catch (err) {
         const msg = err?.message || "Không thể cập nhật buổi học.";
         toast?.error?.(msg);
-
-        // rollback đơn giản: reload lại tuần / gọi lại API list sau này
-        // hiện tại chưa có API GET nên tạm thời không rollback chi tiết
       }
     },
     [lessons, weekStart, toast]
   );
 
-  // toggle ghim 1 buổi (tạo chuỗi / bỏ chuỗi) – tạm thời chỉ local
-  const togglePinLesson = useCallback((lessonId) => {
-    setLessons((prev) => {
-      const original = prev.find((l) => l.id === lessonId);
-      if (!original || !original.date) return prev;
+  // 5) Ghim / bỏ ghim (sync với DB)
+  const togglePinLesson = useCallback(
+    async (lessonId) => {
+      const original = lessons.find((l) => l.id === lessonId);
+      if (!original || !original.date) return;
 
-      const startDate = dayjs(original.date).startOf("day");
-      const endDate = startDate.add(3, "month");
+      const baseDate = dayjs(original.date).startOf("day");
+      const endDate = baseDate.add(3, "month");
 
-      // Ghim
+      // TÌM student từ danh sách students để tạo lịch mới khi ghim
+      const student = students.find(
+        (s) => String(s.id) === String(original.studentId)
+      );
+
+      // ===== CASE 1: GHIM (từ false -> true) =====
       if (!original.pinned) {
-        const newLessons = [];
-        let cursor = startDate.add(1, "week");
-
-        while (
-          cursor.isBefore(endDate, "day") ||
-          cursor.isSame(endDate, "day")
-        ) {
-          const cursorDay = cursor;
-
-          const exists = prev.some(
-            (l) =>
-              l.studentId === original.studentId &&
-              l.hour === original.hour &&
-              l.date &&
-              dayjs(l.date).isSame(cursorDay, "day")
-          );
-
-          if (!exists) {
-            const colorClass =
-              original.colorClass || STUDENT_COLOR_TO_CLASS.blue;
-
-            newLessons.push({
-              ...original,
-              id: `lesson-${cursor.valueOf()}-${Math.random()
-                .toString(16)
-                .slice(2)}`,
-              date: cursor.toISOString(),
-              pinned: true,
-              // pinned clone hiện chưa có scheduleId → chưa sync BE
-              scheduleId: null,
-              colorClass,
-            });
-          }
-
-          cursor = cursor.add(1, "week");
+        // 1) update buổi gốc trên DB
+        if (original.scheduleId) {
+          await updateSchedulePinned(original, true);
         }
 
-        const updated = prev.map((l) =>
-          l.id === lessonId ? { ...l, pinned: true } : l
-        );
+        const newLessons = [];
 
-        return [...updated, ...newLessons];
+        if (student) {
+          // 2) tạo các buổi lặp 1 tuần / lần trong 3 tháng trên DB
+          let cursor = baseDate.add(1, "week");
+
+          while (
+            cursor.isBefore(endDate, "day") ||
+            cursor.isSame(endDate, "day")
+          ) {
+            // "chụp" giá trị ngày hiện tại của cursor ra 1 biến riêng
+            const targetDateStr = cursor.format("YYYY-MM-DD");
+
+            const exists = lessons.some((l) => {
+              if (!l.date) return false;
+
+              return (
+                String(l.studentId) === String(original.studentId) &&
+                l.hour === original.hour &&
+                dayjs(l.date).format("YYYY-MM-DD") === targetDateStr
+              );
+            });
+
+            if (!exists && student) {
+              const created = await createSchedule({
+                student,
+                weekStart: cursor,
+                dayIndex: 0,
+                hour: original.hour,
+                isPinned: true,
+              });
+              newLessons.push(created);
+            }
+
+            cursor = cursor.add(1, "week");
+          }
+        }
+
+        // 3) update state: buổi gốc pinned:true + thêm các buổi mới
+        setLessons((prev) => [
+          ...prev.map((l) => (l.id === lessonId ? { ...l, pinned: true } : l)),
+          ...newLessons,
+        ]);
+
+        return;
       }
 
-      // Bỏ ghim: chỉ thao tác local
-      const filtered = prev.filter((l) => {
-        if (l.id === lessonId) return true;
-        if (
-          l.studentId !== original.studentId ||
-          l.hour !== original.hour ||
-          !l.date
-        )
-          return true;
+      // ===== CASE 2: HUỶ GHIM (từ true -> false) =====
+      // 1) Bỏ ghim buổi gốc trên DB
+      if (original.scheduleId) {
+        await updateSchedulePinned(original, false);
+      }
+
+      // 2) tìm tất cả buổi pinned về sau (cùng student, cùng hour, trong 3 tháng tới)
+      const toDelete = lessons.filter((l) => {
+        if (!l.pinned) return false;
+        if (!l.scheduleId) return false;
+        if (!l.date) return false;
+        if (String(l.studentId) !== String(original.studentId)) return false;
+        if (l.hour !== original.hour) return false;
 
         const d = dayjs(l.date).startOf("day");
-
-        return !(
-          d.isAfter(startDate, "day") &&
+        // chỉ xóa các buổi sau ngày gốc
+        return (
+          d.isAfter(baseDate, "day") &&
           (d.isBefore(endDate, "day") || d.isSame(endDate, "day"))
         );
       });
 
-      return filtered.map((l) =>
-        l.id === lessonId ? { ...l, pinned: false } : l
-      );
-    });
-  }, []);
+      // 3) Xóa khỏi DB (song song)
+      await Promise.all(toDelete.map((l) => deleteSchedule(l)));
 
-  // đổi cả chuỗi buổi ghim dựa trên 1 buổi gốc – hiện tại chỉ local
+      const idsToDelete = new Set(toDelete.map((l) => l.id));
+
+      // 4) Cập nhật state: xoá các buổi pinned về sau + set pinned=false cho buổi gốc
+      setLessons((prev) =>
+        prev
+          .filter((l) => !idsToDelete.has(l.id))
+          .map((l) => (l.id === lessonId ? { ...l, pinned: false } : l))
+      );
+    },
+    [lessons, students]
+  );
+
+  // 6) Di chuyển cả chuỗi ghim (local)
   const movePinnedSeries = useCallback(
     (sourceLesson, targetHour, targetDate) => {
       const sourceDate = dayjs(sourceLesson.date).startOf("day");
       const targetDay = dayjs(targetDate).startOf("day");
-
       const diffDays = targetDay.diff(sourceDate, "day");
       const diffHours = targetHour - sourceLesson.hour;
 
       setLessons((prev) =>
         prev.map((l) => {
           if (
-            l.studentId === sourceLesson.studentId &&
+            String(l.studentId) === String(sourceLesson.studentId) &&
             l.pinned &&
             l.date &&
             l.hour === sourceLesson.hour
@@ -189,6 +287,7 @@ export function useLessonsState({ students, weekStart, toast }) {
               .startOf("day")
               .add(diffDays, "day")
               .toISOString();
+
             return {
               ...l,
               date: newDate,
@@ -197,22 +296,17 @@ export function useLessonsState({ students, weekStart, toast }) {
           }
 
           if (l.id === sourceLesson.id) {
-            return {
-              ...l,
-              date: targetDate,
-              hour: targetHour,
-            };
+            return { ...l, date: targetDate, hour: targetHour };
           }
 
           return l;
         })
       );
-
-      // TODO: sau này có thể sync BE cho cả chuỗi
     },
     []
   );
 
+  // 7) Xóa 1 buổi
   const removeLesson = useCallback(
     async (lessonId) => {
       let targetLesson = null;
@@ -220,12 +314,10 @@ export function useLessonsState({ students, weekStart, toast }) {
       setLessons((prev) => {
         targetLesson = prev.find((l) => l.id === lessonId) || null;
         if (!targetLesson) return prev;
-
-        // Optimistic: xoá khỏi UI trước
         return prev.filter((l) => l.id !== lessonId);
       });
 
-      if (!targetLesson) return;
+      if (!targetLesson?.scheduleId) return;
 
       try {
         await deleteSchedule(targetLesson);
@@ -233,7 +325,6 @@ export function useLessonsState({ students, weekStart, toast }) {
       } catch (err) {
         const msg = err?.message || "Không thể xoá buổi học.";
         toast?.error?.(msg);
-        // Có thể cần reload lại lịch từ server để đồng bộ
       }
     },
     [toast]

@@ -1,6 +1,16 @@
-// src/features/schedule/api/scheduleApi.js
+// src/features/schedule/utils/scheduleApi.js
 import { api } from "../../../utils/apiClient.js";
 import dayjs from "dayjs";
+
+export async function unpinSeries(lesson) {
+  if (!lesson.scheduleId) return;
+  await api.post(`/schedules/${lesson.scheduleId}/unpin-series`);
+}
+
+export async function fetchWeekSchedules(weekStartIso) {
+  const qs = new URLSearchParams({ start: weekStartIso }).toString();
+  return api.get(`/schedules/week?${qs}`);
+}
 
 // map từ backend ScheduleResponse -> lesson cho UI
 export function mapScheduleToLesson(schedule, student, colorClass) {
@@ -17,11 +27,20 @@ export function mapScheduleToLesson(schedule, student, colorClass) {
     hour,
     date,
     colorClass,
-    pinned: false,
+
+    // ĐỌC TRẠNG THÁI GHIM TỪ DB
+    pinned: !!schedule.isPinned,
+    isGeneratedFromPin: false,
   };
 }
 
-export async function createSchedule({ student, weekStart, dayIndex, hour }) {
+export async function createSchedule({
+  student,
+  weekStart,
+  dayIndex,
+  hour,
+  isPinned = false,
+}) {
   const day = weekStart.add(dayIndex, "day");
   const start = day.hour(hour).minute(0).second(0).millisecond(0);
   const end = start.add(60, "minute");
@@ -31,7 +50,8 @@ export async function createSchedule({ student, weekStart, dayIndex, hour }) {
     title: student.note || student.name,
     startTime: start.toISOString(),
     endTime: end.toISOString(),
-    type: 0, // tuỳ enum của bạn, tạm thời = 0
+    type: 0, // tùy enum của bạn
+    isPinned,
   };
 
   const schedule = await api.post("/schedules", body);
@@ -49,6 +69,28 @@ export async function createSchedule({ student, weekStart, dayIndex, hour }) {
     STUDENT_COLOR_TO_CLASS[student.color] ?? STUDENT_COLOR_TO_CLASS.blue;
 
   return mapScheduleToLesson(schedule, student, colorClass);
+}
+
+export async function updateSchedulePinned(lesson, isPinned) {
+  if (!lesson.scheduleId) return;
+
+  // Tính lại start/end từ lesson.date + lesson.hour
+  const start = dayjs(lesson.date)
+    .hour(lesson.hour)
+    .minute(0)
+    .second(0)
+    .millisecond(0);
+  const end = start.add(60, "minute");
+
+  const body = {
+    title: lesson.studentName,
+    startTime: start.toISOString(),
+    endTime: end.toISOString(),
+    type: 0,
+    isPinned, // >>> MỚI
+  };
+
+  await api.put(`/schedules/${lesson.scheduleId}`, body);
 }
 
 export async function updateScheduleTime({
