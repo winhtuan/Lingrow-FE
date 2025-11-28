@@ -18,9 +18,9 @@ const VN_DAY_FULL = [
 ];
 
 const FREE_PERIOD_OPTIONS = [
-  { value: "morning", label: "Sáng (6:00 – 12:00)" },
-  { value: "afternoon", label: "Chiều (12:00 – 18:00)" },
-  { value: "evening", label: "Tối (18:00 – 23:00)" },
+  { value: "morning", label: "Buổi Sáng" },
+  { value: "afternoon", label: "Buổi Chiều" },
+  { value: "evening", label: "Buổi Tối" },
 ];
 
 export default function CalendarGrid({
@@ -90,7 +90,7 @@ export default function CalendarGrid({
               <Select
                 options={FREE_PERIOD_OPTIONS}
                 placeholder="Xem lịch trống"
-                value={undefined} // luôn hiển thị placeholder
+                value={undefined}
                 onChange={(val) => {
                   if (!val) return;
                   onOpenFreeSlots?.(val);

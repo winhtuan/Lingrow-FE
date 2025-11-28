@@ -18,22 +18,16 @@ const PERIOD_CONFIG = {
   morning: {
     key: "morning",
     label: "buổi sáng",
-    timeRangeLabel: "6:00 – 12:00",
-    // 6..11
     hours: Array.from({ length: 6 }, (_, i) => 6 + i),
   },
   afternoon: {
     key: "afternoon",
     label: "buổi chiều",
-    timeRangeLabel: "12:00 – 18:00",
-    // 12..17
     hours: Array.from({ length: 6 }, (_, i) => 12 + i),
   },
   evening: {
     key: "evening",
     label: "buổi tối",
-    timeRangeLabel: "18:00 – 24:00",
-    // 18..22 (slot 22:00–23:00)
     hours: Array.from({ length: 6 }, (_, i) => 18 + i),
   },
 };
