@@ -82,10 +82,10 @@ export default function StudentCard({
     onEdit?.(student);
   };
 
-  const handleDeleteClick = (e) => {
+  const handleDeleteCardClick = (e) => {
     e.stopPropagation();
     setMenuOpen(false);
-    onDelete?.(student);
+    onDelete?.(student.id);
   };
 
   return (
@@ -160,21 +160,9 @@ export default function StudentCard({
                     Sửa thẻ
                   </button>
 
-                  {/* Xoá lịch → pastel amber */}
-                  <button
-                    onClick={handleDeleteClick}
-                    className="
-                      w-full flex items-center px-3 h-8 rounded-xl
-                      text-slate-700 bg-slate-50/50
-                      hover:bg-sky-100 transition
-                    "
-                  >
-                    Xoá lịch
-                  </button>
-
                   {/* Xoá thẻ → pastel rose */}
                   <button
-                    onClick={handleDeleteClick}
+                    onClick={handleDeleteCardClick}
                     className="
                       w-full flex items-center px-3 h-8 rounded-xl
                       text-slate-700 bg-slate-50/50

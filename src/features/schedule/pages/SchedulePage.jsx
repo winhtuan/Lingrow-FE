@@ -31,6 +31,7 @@ export default function SchedulePage() {
     studentQuery,
     setStudentQuery,
     addStudent,
+    deleteStudent,
   } = useStudents([]);
 
   // quản lý tuần
@@ -156,6 +157,7 @@ export default function SchedulePage() {
                 tagFilter={tagFilter}
                 onTagFilterChange={setTagFilter}
                 onOpenCreate={() => setCreateOpen(true)}
+                onDeleteStudent={deleteStudent}
               />
 
               <CalendarGrid

@@ -39,7 +39,6 @@ export function useScheduleDnd({
         // lesson trên lịch -> xóa
         if (activeIdStr.startsWith("lesson-")) {
           removeLesson?.(activeIdStr);
-          toast?.success?.("Đã xoá buổi học khỏi lịch");
         }
         // thẻ học sinh -> chỉ hủy kéo
         setActiveId(null);

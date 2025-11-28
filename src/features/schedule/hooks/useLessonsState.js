@@ -70,6 +70,9 @@ export function useLessonsState({ weekStart, students, toast }) {
     });
 
     setLessons((prev) => {
+      // Tạo Set các studentId còn tồn tại
+      const validStudentIds = new Set(students.map((s) => String(s.id)));
+
       // lesson cũ có scheduleId → dùng để giữ pinned
       const prevByScheduleId = new Map();
       for (const l of prev) {
@@ -94,11 +97,19 @@ export function useLessonsState({ weekStart, students, toast }) {
       // giữ lại:
       // - lesson local (scheduleId null, ví dụ series từ pin)
       // - lesson cũ có scheduleId nhưng không còn trong batch mới
+      // NHƯNG CHỈ GIỮ NẾU student còn tồn tại
       const localLessons = prev.filter(
-        (l) => !l.scheduleId || !newScheduleIds.has(l.scheduleId)
+        (l) =>
+          validStudentIds.has(String(l.studentId)) &&
+          (!l.scheduleId || !newScheduleIds.has(l.scheduleId))
       );
 
-      return [...localLessons, ...mappedWithPinned];
+      // Lọc bỏ các lesson của student đã bị xóa
+      const validMapped = mappedWithPinned.filter((l) =>
+        validStudentIds.has(String(l.studentId))
+      );
+
+      return [...localLessons, ...validMapped];
     });
   }, [schedules, students]);
 

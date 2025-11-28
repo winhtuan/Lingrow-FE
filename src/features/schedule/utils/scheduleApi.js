@@ -1,6 +1,15 @@
 // src/features/schedule/utils/scheduleApi.js
 import { api } from "../../../utils/apiClient.js";
 import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+
+// Enable UTC and timezone plugins
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+// Set default timezone to Asia/Ho_Chi_Minh (UTC+7)
+const TIMEZONE = "Asia/Ho_Chi_Minh";
 
 export async function unpinSeries(lesson) {
   if (!lesson.scheduleId) return;
@@ -8,13 +17,14 @@ export async function unpinSeries(lesson) {
 }
 
 export async function fetchWeekSchedules(weekStartIso) {
-  const qs = new URLSearchParams({ start: weekStartIso }).toString();
-  return api.get(`/schedules/week?${qs}`);
+    const qs = new URLSearchParams({ start: weekStartIso }).toString();
+    return await api.get(`/schedules/week?${qs}`);
 }
 
 // map từ backend ScheduleResponse -> lesson cho UI
 export function mapScheduleToLesson(schedule, student, colorClass) {
-  const start = dayjs(schedule.startTime);
+  // Convert UTC time from backend to local timezone
+  const start = dayjs.utc(schedule.startTime).tz(TIMEZONE);
   const date = start.startOf("day").toISOString();
   const hour = start.hour();
 
@@ -41,15 +51,20 @@ export async function createSchedule({
   hour,
   isPinned = false,
 }) {
+  // Create datetime in local timezone (Asia/Ho_Chi_Minh)
   const day = weekStart.add(dayIndex, "day");
-  const start = day.hour(hour).minute(0).second(0).millisecond(0);
+  const start = dayjs.tz(
+    `${day.format("YYYY-MM-DD")} ${hour}:00:00`,
+    "YYYY-MM-DD HH:mm:ss",
+    TIMEZONE
+  );
   const end = start.add(60, "minute");
 
   const body = {
     studentCardId: student.id,
     title: student.note || student.name,
-    startTime: start.toISOString(),
-    endTime: end.toISOString(),
+    startTime: start.utc().format(), // Convert to UTC for backend
+    endTime: end.utc().format(),
     type: 0, // tùy enum của bạn
     isPinned,
   };
@@ -74,20 +89,21 @@ export async function createSchedule({
 export async function updateSchedulePinned(lesson, isPinned) {
   if (!lesson.scheduleId) return;
 
-  // Tính lại start/end từ lesson.date + lesson.hour
-  const start = dayjs(lesson.date)
-    .hour(lesson.hour)
-    .minute(0)
-    .second(0)
-    .millisecond(0);
+  // Tính lại start/end từ lesson.date + lesson.hour in local timezone
+  const dateStr = dayjs(lesson.date).format("YYYY-MM-DD");
+  const start = dayjs.tz(
+    `${dateStr} ${lesson.hour}:00:00`,
+    "YYYY-MM-DD HH:mm:ss",
+    TIMEZONE
+  );
   const end = start.add(60, "minute");
 
   const body = {
     title: lesson.studentName,
-    startTime: start.toISOString(),
-    endTime: end.toISOString(),
+    startTime: start.utc().format(),
+    endTime: end.utc().format(),
     type: 0,
-    isPinned, // >>> MỚI
+    isPinned,
   };
 
   await api.put(`/schedules/${lesson.scheduleId}`, body);
@@ -105,14 +121,19 @@ export async function updateScheduleTime({
   }
 
   const day = weekStart.add(dayIndex, "day");
-  const start = day.hour(hour).minute(0).second(0).millisecond(0);
+  const dateStr = day.format("YYYY-MM-DD");
+  const start = dayjs.tz(
+    `${dateStr} ${hour}:00:00`,
+    "YYYY-MM-DD HH:mm:ss",
+    TIMEZONE
+  );
   const end = start.add(60, "minute");
 
   const body = {
     // giữ nguyên title + type, FE không sửa ở đây
     title: lesson.studentName,
-    startTime: start.toISOString(),
-    endTime: end.toISOString(),
+    startTime: start.utc().format(),
+    endTime: end.utc().format(),
     type: 0,
   };
 

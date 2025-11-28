@@ -48,6 +48,16 @@ export async function api(path, options = {}) {
     const err = new Error(msg);
     err.status = res.status;
     err.payload = data;
+    
+    // Log để debug
+    if (res.status === 401) {
+      console.error('❌ Authentication failed:', {
+        url,
+        hasToken: !!token,
+        tokenPreview: token ? `${token.substring(0, 20)}...` : 'none'
+      });
+    }
+    
     throw err;
   }
 

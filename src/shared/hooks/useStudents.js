@@ -5,6 +5,7 @@ import { useAuth } from "../../app/providers/AuthProvider";
 import {
   fetchStudentCards,
   createStudentCard,
+  deleteStudentCard,
 } from "../../features/schedule/utils/studentCardsApi";
 
 function mapCardToStudent(card) {
@@ -90,11 +91,27 @@ export function useStudents(initial = []) {
     [user, toast]
   );
 
+  const deleteStudent = useCallback(
+    async (studentId) => {
+      try {
+        await deleteStudentCard(studentId);
+        setStudents((prev) => prev.filter((s) => s.id !== studentId));
+        toast.success("Đã xóa thẻ học sinh");
+      } catch (err) {
+        const msg = err?.message || "Không thể xóa thẻ học sinh.";
+        toast.error(msg);
+        throw err;
+      }
+    },
+    [toast]
+  );
+
   return {
     students,
     filteredStudents,
     studentQuery,
     setStudentQuery,
     addStudent,
+    deleteStudent,
   };
 }
