@@ -4,6 +4,7 @@ import dayjs from "dayjs";
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
 import ScheduleCell from "./ScheduleCell";
 import Button from "../../../ui/Button";
+import Select from "../../../ui/Select";
 
 const HOURS = Array.from({ length: 18 }, (_, i) => 6 + i);
 const VN_DAY_FULL = [
@@ -16,6 +17,12 @@ const VN_DAY_FULL = [
   "Thứ bảy",
 ];
 
+const FREE_PERIOD_OPTIONS = [
+  { value: "morning", label: "Sáng (6:00 – 12:00)" },
+  { value: "afternoon", label: "Chiều (12:00 – 18:00)" },
+  { value: "evening", label: "Tối (18:00 – 23:00)" },
+];
+
 export default function CalendarGrid({
   lessons = [],
   weekStart,
@@ -25,6 +32,7 @@ export default function CalendarGrid({
   onToday,
   onPinLesson,
   isDragging,
+  onOpenFreeSlots, // callback mở modal lịch trống
 }) {
   const today = dayjs();
 
@@ -33,6 +41,7 @@ export default function CalendarGrid({
     [weekStart]
   );
 
+  // gom lessons theo slot dayIndex-hour
   const lessonsBySlot = useMemo(() => {
     const map = {};
     const weekEnd = weekStart.add(7, "day");
@@ -56,7 +65,7 @@ export default function CalendarGrid({
 
   return (
     <section className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-      {/* Header lịch (tiêu đề + nút tuần trước / sau) */}
+      {/* Header lịch (tiêu đề + nút tuần trước / sau / lịch trống) */}
       <div className="border-b border-slate-200 px-6 py-4 bg-white">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
@@ -74,7 +83,23 @@ export default function CalendarGrid({
             </div>
           </div>
 
+          {/* Bên phải: dropdown lịch trống + điều hướng tuần */}
           <div className="flex items-center gap-3">
+            {/* Dropdown Lịch trống */}
+            <div className="w-52">
+              <Select
+                options={FREE_PERIOD_OPTIONS}
+                placeholder="Xem lịch trống"
+                value={undefined} // luôn hiển thị placeholder
+                onChange={(val) => {
+                  if (!val) return;
+                  onOpenFreeSlots?.(val);
+                }}
+                align="right"
+              />
+            </div>
+
+            {/* Buttons tuần trước / tuần sau */}
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"

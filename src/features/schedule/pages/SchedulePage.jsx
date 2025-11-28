@@ -6,6 +6,7 @@ import StudentPanel from "../components/StudentPanel";
 import DndWrapper from "../components/DndWrapper";
 import CreateStudentModal from "../components/CreateStudentModal";
 import PinnedMoveDialog from "../components/PinnedMoveDialog";
+import FreeSlotsModal from "../components/FreeSlotsModal";
 
 import TopBar from "../../../shared/components/layout/TopBar";
 import TutorSidebar from "../../tutor/components/TutorSidebar";
@@ -88,6 +89,15 @@ export default function SchedulePage() {
     toast,
   });
 
+  // Modal xem lịch trống
+  const [freeModalOpen, setFreeModalOpen] = useState(false);
+  const [freePeriod, setFreePeriod] = useState("morning"); // morning | afternoon | evening
+
+  const handleOpenFreeSlots = (period) => {
+    setFreePeriod(period || "morning");
+    setFreeModalOpen(true);
+  };
+
   const handleCreate = () => {
     if (!newName.trim()) {
       toast.error("Hãy nhập tên học sinh");
@@ -169,6 +179,7 @@ export default function SchedulePage() {
                 onToday={todayWeek}
                 onPinLesson={togglePinLesson}
                 isDragging={!!activeStudent}
+                onOpenFreeSlots={handleOpenFreeSlots}
               />
             </div>
           </main>
@@ -190,6 +201,14 @@ export default function SchedulePage() {
             onCancel={cancelPinnedMove}
             onOnlyThis={handlePinnedMoveOnlyThis}
             onSeries={handlePinnedMoveSeries}
+          />
+
+          <FreeSlotsModal
+            open={freeModalOpen}
+            onClose={() => setFreeModalOpen(false)}
+            period={freePeriod}
+            weekStart={weekStart}
+            lessons={lessons}
           />
         </DndWrapper>
       </div>
