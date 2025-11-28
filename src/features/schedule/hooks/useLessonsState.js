@@ -46,7 +46,8 @@ export function useLessonsState({ weekStart, students, toast }) {
     return () => {
       cancelled = true;
     };
-  }, [weekStart, toast]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [weekStart]);
 
   // 2) Map schedules + students thành lessons, giữ lại trạng thái pinned
   useEffect(() => {
